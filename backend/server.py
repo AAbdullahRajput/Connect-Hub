@@ -10,6 +10,7 @@ from routes.postRoutes import router as post_router
 from routes.likeRoutes import router as like_router
 from routes.commentRoutes import router as comment_router
 from routes.userRoutes import router as user_router
+from routes.followRoutes import router as follow_router
 
 
 load_dotenv()
@@ -36,6 +37,7 @@ app.include_router(post_router, prefix="/api/posts", tags=["Posts"])
 app.include_router(like_router, prefix="/api/posts", tags=["Likes"])
 app.include_router(comment_router, prefix="/api/posts", tags=["Comments"])
 app.include_router(user_router, prefix="/api/users", tags=["Users"])
+app.include_router(follow_router, prefix="/api/users", tags=["Follow"])
 
 # Socket.io events
 @sio.event
