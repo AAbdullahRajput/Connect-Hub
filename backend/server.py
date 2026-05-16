@@ -7,6 +7,9 @@ import os
 
 from routes.authRoutes import router as auth_router
 from routes.postRoutes import router as post_router
+from routes.likeRoutes import router as like_router
+from routes.commentRoutes import router as comment_router
+
 
 load_dotenv()
 
@@ -29,6 +32,8 @@ socket_app = socketio.ASGIApp(sio, app)
 # Routes
 app.include_router(auth_router, prefix="/api/auth", tags=["Auth"])
 app.include_router(post_router, prefix="/api/posts", tags=["Posts"])
+app.include_router(like_router, prefix="/api/posts", tags=["Likes"])
+app.include_router(comment_router, prefix="/api/posts", tags=["Comments"])
 
 # Socket.io events
 @sio.event
