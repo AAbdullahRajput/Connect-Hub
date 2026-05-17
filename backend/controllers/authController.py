@@ -31,21 +31,19 @@ async def register(data: RegisterModel):
             "role": "user"
         }).execute()
 
-        user = new_user.data[0]
+        user_id = new_user.data[0]["id"]
 
-        # Create token
-        token = create_access_token({"user_id": user["id"]})
+        # Fetch full user data
+        full_user = supabase.table("users").select(
+            "id, name, username, email, bio, profile_picture, cover_photo, role, followers_count, following_count, posts_count, created_at"
+        ).eq("id", user_id).execute()
+
+        token = create_access_token({"user_id": user_id})
 
         return {
             "message": "Registration successful",
             "token": token,
-            "user": {
-                "id": user["id"],
-                "name": user["name"],
-                "username": user["username"],
-                "email": user["email"],
-                "role": user["role"]
-            }
+            "user": full_user.data[0]
         }
 
     except HTTPException as e:
@@ -68,19 +66,17 @@ async def login(data: LoginModel):
         if not pwd_context.verify(data.password, user["password"]):
             raise HTTPException(status_code=400, detail="Invalid email or password")
 
-        # Create token
+        # Fetch full user data (without password)
+        full_user = supabase.table("users").select(
+            "id, name, username, email, bio, profile_picture, cover_photo, role, followers_count, following_count, posts_count, created_at"
+        ).eq("id", user["id"]).execute()
+
         token = create_access_token({"user_id": user["id"]})
 
         return {
             "message": "Login successful",
             "token": token,
-            "user": {
-                "id": user["id"],
-                "name": user["name"],
-                "username": user["username"],
-                "email": user["email"],
-                "role": user["role"]
-            }
+            "user": full_user.data[0]
         }
 
     except HTTPException as e:
