@@ -9,8 +9,8 @@ const CommentSection = ({ postId }) => {
   const [content, setContent] = useState('')
   const [loading, setLoading] = useState(false)
   const [fetching, setFetching] = useState(true)
+  const [focused, setFocused] = useState(false)
 
-  // Load comments on mount
   useEffect(() => {
     const fetchComments = async () => {
       try {
@@ -55,101 +55,283 @@ const CommentSection = ({ postId }) => {
     if (mins < 60) return `${mins}m ago`
     const hrs = Math.floor(mins / 60)
     if (hrs < 24) return `${hrs}h ago`
-    const days = Math.floor(hrs / 24)
-    return `${days}d ago`
+    return `${Math.floor(hrs / 24)}d ago`
   }
 
   return (
-    <div className="mt-6">
-      <h3 className="text-white font-semibold mb-4">
-        Comments ({comments.length})
-      </h3>
+    <div style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
 
-      {/* Add comment */}
-      <div className="flex gap-3 mb-6">
-        {user?.profile_picture ? (
-          <img
-            src={user.profile_picture}
-            alt={user.name}
-            className="w-8 h-8 rounded-full object-cover border border-zinc-700 flex-shrink-0"
-          />
-        ) : (
-          <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-            {user?.name?.[0]?.toUpperCase()}
-          </div>
-        )}
-        <div className="flex-1 flex gap-2">
+      {/* Header */}
+      <div style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        marginBottom: '20px'
+      }}>
+        <h3 style={{ color: '#fff', fontSize: '1rem', fontWeight: '700', margin: 0 }}>
+          💬 Comments
+        </h3>
+        <span style={{
+          background: 'rgba(37,99,235,0.1)', border: '1px solid rgba(37,99,235,0.2)',
+          color: '#60a5fa', fontSize: '0.75rem', fontWeight: '700',
+          padding: '3px 10px', borderRadius: '100px'
+        }}>
+          {comments.length}
+        </span>
+      </div>
+
+      {/* Add comment box */}
+      <div style={{
+        display: 'flex', gap: '12px', marginBottom: '24px',
+        background: focused ? 'rgba(37,99,235,0.04)' : '#18181b',
+        border: `1px solid ${focused ? 'rgba(37,99,235,0.35)' : '#27272a'}`,
+        borderRadius: '16px', padding: '14px',
+        transition: 'all 0.2s',
+        boxShadow: focused ? '0 0 0 3px rgba(37,99,235,0.08)' : 'none'
+      }}>
+
+        {/* Avatar */}
+        <div style={{ flexShrink: 0 }}>
+          {user?.profile_picture ? (
+            <img src={user.profile_picture} alt={user.name} style={{
+              width: '36px', height: '36px', borderRadius: '50%',
+              objectFit: 'cover', border: '2px solid rgba(37,99,235,0.3)'
+            }} />
+          ) : (
+            <div style={{
+              width: '36px', height: '36px', borderRadius: '50%',
+              background: 'linear-gradient(135deg, #2563EB, #7c3aed)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              color: '#fff', fontSize: '13px', fontWeight: '700'
+            }}>
+              {user?.name?.[0]?.toUpperCase()}
+            </div>
+          )}
+        </div>
+
+        {/* Input + button */}
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '10px' }}>
           <input
             type="text"
             value={content}
-            onChange={(e) => setContent(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
-            placeholder="Write a comment..."
-            className="flex-1 bg-zinc-800 border border-zinc-700 text-white rounded-full px-4 py-2 text-sm focus:outline-none focus:border-blue-500 transition"
+            onChange={e => setContent(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && handleSubmit()}
+            onFocus={() => setFocused(true)}
+            onBlur={() => setFocused(false)}
+            placeholder={`Reply as ${user?.name?.split(' ')[0]}...`}
+            style={{
+              width: '100%', background: 'transparent',
+              border: 'none', color: '#fff',
+              fontSize: '0.9rem', outline: 'none',
+              fontFamily: 'inherit', boxSizing: 'border-box'
+            }}
           />
-          <button
-            onClick={handleSubmit}
-            disabled={loading || !content.trim()}
-            className="bg-blue-600 hover:bg-blue-700 disabled:opacity-40 text-white text-sm font-semibold px-4 py-2 rounded-full transition"
-          >
-            {loading ? '...' : 'Post'}
-          </button>
+
+          {/* Action bar — shown when focused or has content */}
+          {(focused || content) && (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span style={{ color: '#3f3f50', fontSize: '0.72rem' }}>
+                Press Enter to post
+              </span>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button
+                  onClick={() => { setContent(''); setFocused(false) }}
+                  style={{
+                    background: 'transparent', border: '1px solid #27272a',
+                    color: '#71717a', borderRadius: '100px',
+                    padding: '5px 14px', fontSize: '0.8rem',
+                    cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s'
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = '#3f3f46'; e.currentTarget.style.color = '#fff' }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = '#27272a'; e.currentTarget.style.color = '#71717a' }}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSubmit}
+                  disabled={loading || !content.trim()}
+                  style={{
+                    background: loading || !content.trim()
+                      ? '#27272a'
+                      : 'linear-gradient(135deg, #2563EB, #1d4ed8)',
+                    border: 'none', color: loading || !content.trim() ? '#52525b' : '#fff',
+                    borderRadius: '100px', padding: '5px 16px',
+                    fontSize: '0.8rem', fontWeight: '700',
+                    cursor: loading || !content.trim() ? 'not-allowed' : 'pointer',
+                    fontFamily: 'inherit', transition: 'all 0.2s',
+                    boxShadow: !loading && content.trim() ? '0 4px 12px rgba(37,99,235,0.3)' : 'none'
+                  }}
+                >
+                  {loading ? '⏳' : '✦ Post'}
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
       {/* Comments list */}
       {fetching ? (
-        <p className="text-gray-500 text-sm">Loading comments...</p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          {[1, 2, 3].map(i => (
+            <div key={i} style={{
+              height: '72px', background: '#18181b', borderRadius: '14px',
+              border: '1px solid #27272a'
+            }} />
+          ))}
+        </div>
       ) : comments.length === 0 ? (
-        <p className="text-gray-500 text-sm">No comments yet. Be the first!</p>
+        <div style={{
+          textAlign: 'center', padding: '40px 20px',
+          background: '#18181b', borderRadius: '16px',
+          border: '1px solid #27272a'
+        }}>
+          <div style={{ fontSize: '2rem', marginBottom: '10px' }}>💬</div>
+          <p style={{ color: '#52525b', fontSize: '0.9rem', fontWeight: '600', margin: '0 0 4px' }}>
+            No comments yet
+          </p>
+          <p style={{ color: '#3f3f50', fontSize: '0.8rem', margin: 0 }}>
+            Be the first to share your thoughts!
+          </p>
+        </div>
       ) : (
-        <div className="space-y-4">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
           {comments.map((comment) => (
-            <div key={comment.id} className="flex gap-3">
-              {/* Avatar */}
-              <Link to={`/profile/${comment.users?.username}`}>
-                {comment.users?.profile_picture ? (
-                  <img
-                    src={comment.users.profile_picture}
-                    alt={comment.users.name}
-                    className="w-8 h-8 rounded-full object-cover border border-zinc-700"
-                  />
-                ) : (
-                  <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-bold">
-                    {comment.users?.name?.[0]?.toUpperCase()}
-                  </div>
-                )}
-              </Link>
-
-              {/* Comment bubble */}
-              <div className="flex-1">
-                <div className="bg-zinc-800 rounded-2xl px-4 py-3">
-                  <div className="flex items-center justify-between mb-1">
-                    <Link
-                      to={`/profile/${comment.users?.username}`}
-                      className="text-white text-sm font-medium hover:underline"
-                    >
-                      {comment.users?.name}
-                    </Link>
-                    {user?.id === comment.user_id && (
-                      <button
-                        onClick={() => handleDelete(comment.id)}
-                        className="text-gray-500 hover:text-red-400 text-xs transition"
-                      >
-                        Delete
-                      </button>
-                    )}
-                  </div>
-                  <p className="text-gray-300 text-sm">{comment.content}</p>
-                </div>
-                <p className="text-gray-500 text-xs mt-1 ml-4">
-                  {timeAgo(comment.created_at)}
-                </p>
-              </div>
-            </div>
+            <CommentItem
+              key={comment.id}
+              comment={comment}
+              user={user}
+              onDelete={handleDelete}
+              timeAgo={timeAgo}
+            />
           ))}
         </div>
       )}
+    </div>
+  )
+}
+
+const CommentItem = ({ comment, user, onDelete, timeAgo }) => {
+  const [hovered, setHovered] = useState(false)
+  const [deleteHovered, setDeleteHovered] = useState(false)
+  const isOwner = user?.id === comment.user_id
+
+  return (
+    <div
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        display: 'flex', gap: '12px',
+        padding: '14px', borderRadius: '16px',
+        background: hovered ? 'rgba(255,255,255,0.03)' : 'transparent',
+        border: `1px solid ${hovered ? 'rgba(255,255,255,0.06)' : 'transparent'}`,
+        transition: 'all 0.2s'
+      }}
+    >
+      {/* Avatar */}
+      <Link to={`/profile/${comment.users?.username}`} style={{ textDecoration: 'none', flexShrink: 0 }}>
+        {comment.users?.profile_picture ? (
+          <img src={comment.users.profile_picture} alt={comment.users.name} style={{
+            width: '36px', height: '36px', borderRadius: '50%',
+            objectFit: 'cover', border: '2px solid rgba(37,99,235,0.25)',
+            transition: 'border-color 0.2s'
+          }} />
+        ) : (
+          <div style={{
+            width: '36px', height: '36px', borderRadius: '50%',
+            background: 'linear-gradient(135deg, #2563EB, #7c3aed)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: '#fff', fontSize: '13px', fontWeight: '700', flexShrink: 0
+          }}>
+            {comment.users?.name?.[0]?.toUpperCase()}
+          </div>
+        )}
+      </Link>
+
+      {/* Bubble */}
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{
+          background: '#18181b', border: '1px solid #27272a',
+          borderRadius: '0 14px 14px 14px', padding: '12px 16px'
+        }}>
+          {/* Name row */}
+          <div style={{
+            display: 'flex', alignItems: 'center',
+            justifyContent: 'space-between', marginBottom: '6px'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Link to={`/profile/${comment.users?.username}`} style={{ textDecoration: 'none' }}>
+                <span style={{
+                  color: '#e4e4e7', fontSize: '0.875rem', fontWeight: '700',
+                  transition: 'color 0.2s'
+                }}
+                  onMouseEnter={e => e.currentTarget.style.color = '#60a5fa'}
+                  onMouseLeave={e => e.currentTarget.style.color = '#e4e4e7'}
+                >
+                  {comment.users?.name}
+                </span>
+              </Link>
+              <span style={{ color: '#3f3f50', fontSize: '0.72rem' }}>
+                @{comment.users?.username}
+              </span>
+            </div>
+
+            {isOwner && hovered && (
+              <button
+                onClick={() => onDelete(comment.id)}
+                onMouseEnter={() => setDeleteHovered(true)}
+                onMouseLeave={() => setDeleteHovered(false)}
+                style={{
+                  background: deleteHovered ? 'rgba(239,68,68,0.1)' : 'transparent',
+                  border: 'none', color: deleteHovered ? '#f87171' : '#3f3f50',
+                  borderRadius: '6px', padding: '3px 8px',
+                  fontSize: '0.72rem', cursor: 'pointer',
+                  fontFamily: 'inherit', transition: 'all 0.2s',
+                  display: 'flex', alignItems: 'center', gap: '4px'
+                }}
+              >
+                🗑️ Delete
+              </button>
+            )}
+          </div>
+
+          {/* Content */}
+          <p style={{
+            color: '#a1a1aa', fontSize: '0.9rem',
+            lineHeight: '1.55', margin: 0
+          }}>
+            {comment.content}
+          </p>
+        </div>
+
+        {/* Timestamp + actions */}
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: '12px',
+          marginTop: '6px', paddingLeft: '4px'
+        }}>
+          <span style={{ color: '#3f3f50', fontSize: '0.72rem' }}>
+            {timeAgo(comment.created_at)}
+          </span>
+          <button style={{
+            background: 'none', border: 'none', color: '#3f3f50',
+            fontSize: '0.72rem', cursor: 'pointer', fontFamily: 'inherit',
+            transition: 'color 0.2s', padding: 0
+          }}
+            onMouseEnter={e => e.currentTarget.style.color = '#60a5fa'}
+            onMouseLeave={e => e.currentTarget.style.color = '#3f3f50'}
+          >
+            👍 Like
+          </button>
+          <button style={{
+            background: 'none', border: 'none', color: '#3f3f50',
+            fontSize: '0.72rem', cursor: 'pointer', fontFamily: 'inherit',
+            transition: 'color 0.2s', padding: 0
+          }}
+            onMouseEnter={e => e.currentTarget.style.color = '#60a5fa'}
+            onMouseLeave={e => e.currentTarget.style.color = '#3f3f50'}
+          >
+            ↩️ Reply
+          </button>
+        </div>
+      </div>
     </div>
   )
 }

@@ -14,6 +14,35 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
+   # HTTP requests
+  dio: ^5.4.0
+
+  # State management
+  provider: ^6.1.2
+
+  # Local storage
+  shared_preferences: ^2.2.2
+
+  # Image picker
+  image_picker: ^1.0.7
+
+  # Socket.io real-time
+  socket_io_client: ^2.0.3+1
+
+  # JWT decode
+  jwt_decode: ^0.3.1
+
+  # Cached network images
+  cached_network_image: ^3.3.1
+
+  # Time ago
+  timeago: ^3.6.1
+
+  # Video player
+  video_player: ^2.8.3
+
+  # File picker
+  file_picker: ^6.1.1
 
 flutter:
   uses-material-design: true

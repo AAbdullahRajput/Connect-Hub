@@ -1,54 +1,91 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import FollowButton from './FollowButton'
 import { useAuth } from '../context/AuthContext'
 
 const UserCard = ({ user: profileUser }) => {
   const { user } = useAuth()
+  const [hovered, setHovered] = useState(false)
 
   return (
-    <div className="flex items-center justify-between p-3 bg-zinc-900 border border-zinc-800 rounded-xl hover:border-zinc-700 transition">
-
+    <div
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '12px 14px', borderRadius: '14px',
+        background: hovered ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.02)',
+        border: `1px solid ${hovered ? '#3f3f46' : 'rgba(255,255,255,0.05)'}`,
+        transition: 'all 0.2s', fontFamily: "'Inter', system-ui, sans-serif"
+      }}
+    >
       {/* Left — avatar + info */}
       <Link
         to={`/profile/${profileUser?.username}`}
-        className="flex items-center gap-3 flex-1 min-w-0"
+        style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '12px', flex: 1, minWidth: 0 }}
       >
         {/* Avatar */}
-        {profileUser?.profile_picture ? (
-          <img
-            src={profileUser.profile_picture}
-            alt={profileUser.name}
-            className="w-10 h-10 rounded-full object-cover border border-zinc-700 flex-shrink-0"
-          />
-        ) : (
-          <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold flex-shrink-0">
-            {profileUser?.name?.[0]?.toUpperCase()}
-          </div>
-        )}
+        <div style={{ position: 'relative', flexShrink: 0 }}>
+          {profileUser?.profile_picture ? (
+            <img
+              src={profileUser.profile_picture}
+              alt={profileUser.name}
+              style={{
+                width: '42px', height: '42px', borderRadius: '50%',
+                objectFit: 'cover',
+                border: '2px solid rgba(37,99,235,0.3)'
+              }}
+            />
+          ) : (
+            <div style={{
+              width: '42px', height: '42px', borderRadius: '50%',
+              background: 'linear-gradient(135deg, #2563EB, #7c3aed)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              color: '#fff', fontWeight: '700', fontSize: '16px'
+            }}>
+              {profileUser?.name?.[0]?.toUpperCase()}
+            </div>
+          )}
+          {/* Online dot */}
+          <div style={{
+            position: 'absolute', bottom: '1px', right: '1px',
+            width: '10px', height: '10px', borderRadius: '50%',
+            background: '#22c55e', border: '2px solid #09090b'
+          }} />
+        </div>
 
         {/* Info */}
-        <div className="min-w-0">
-          <p className="text-white text-sm font-medium truncate">
+        <div style={{ minWidth: 0 }}>
+          <p style={{
+            color: '#e4e4e7', fontSize: '0.875rem', fontWeight: '600',
+            margin: '0 0 2px', overflow: 'hidden',
+            textOverflow: 'ellipsis', whiteSpace: 'nowrap'
+          }}>
             {profileUser?.name}
           </p>
-          <p className="text-gray-400 text-xs truncate">
+          <p style={{
+            color: '#52525b', fontSize: '0.75rem', margin: '0 0 3px',
+            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'
+          }}>
             @{profileUser?.username}
           </p>
           {profileUser?.followers_count !== undefined && (
-            <p className="text-gray-500 text-xs">
-              {profileUser.followers_count} followers
-            </p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <span style={{ fontSize: '10px' }}>👥</span>
+              <span style={{ color: '#3f3f50', fontSize: '0.7rem' }}>
+                {profileUser.followers_count.toLocaleString()} followers
+              </span>
+            </div>
           )}
         </div>
       </Link>
 
       {/* Right — follow button */}
       {user?.id !== profileUser?.id && (
-        <div className="ml-3 flex-shrink-0">
+        <div style={{ marginLeft: '12px', flexShrink: 0 }}>
           <FollowButton targetUserId={profileUser?.id} />
         </div>
       )}
-
     </div>
   )
 }

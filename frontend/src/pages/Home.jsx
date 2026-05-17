@@ -12,7 +12,6 @@ const Home = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
-  // Fetch feed posts
   useEffect(() => {
     const fetchPosts = async () => {
       try {
@@ -25,81 +24,77 @@ const Home = () => {
       }
     }
     fetchPosts()
-
-    // Listen for real-time new posts
-    onPostCreated((newPost) => {
-      setPosts(prev => [newPost, ...prev])
-    })
-
+    onPostCreated((newPost) => setPosts(prev => [newPost, ...prev]))
     return () => removeSocketListeners()
   }, [])
 
-  // Add new post to top of feed
-  const handlePostCreated = (newPost) => {
-    setPosts(prev => [newPost, ...prev])
-  }
-
-  // Remove deleted post from feed
-  const handlePostDeleted = (postId) => {
-    setPosts(prev => prev.filter(p => p.id !== postId))
-  }
+  const handlePostCreated = (newPost) => setPosts(prev => [newPost, ...prev])
+  const handlePostDeleted = (postId) => setPosts(prev => prev.filter(p => p.id !== postId))
 
   return (
-    <div className="min-h-screen bg-black text-white">
-
-      {/* Navbar */}
+    <div style={{
+      minHeight: '100vh', backgroundColor: '#000',
+      fontFamily: "'Inter', system-ui, sans-serif", color: '#fff'
+    }}>
       <Navbar />
-
-      {/* Layout */}
-      <div className="max-w-6xl mx-auto flex pt-16">
-
-        {/* Left Sidebar */}
+      <div style={{ display: 'flex', maxWidth: '1400px', margin: '0 auto', paddingTop: '64px' }}>
         <LeftSidebar />
+        <main style={{
+          flex: 1, marginLeft: '260px', marginRight: '300px',
+          padding: '28px 24px', minHeight: 'calc(100vh - 64px)'
+        }}>
+          {/* Page header */}
+          <div style={{ marginBottom: '24px' }}>
+            <h1 style={{ color: '#fff', fontSize: '1.5rem', fontWeight: '700', margin: '0 0 4px', letterSpacing: '-0.5px' }}>
+              Home Feed
+            </h1>
+            <p style={{ color: '#52525b', fontSize: '0.875rem', margin: 0 }}>
+              Latest posts from people you follow
+            </p>
+          </div>
 
-        {/* Center Feed */}
-        <main className="flex-1 lg:ml-64 xl:mr-72 px-4 py-6 max-w-2xl mx-auto w-full">
-
-          {/* Create Post */}
           <CreatePost onPostCreated={handlePostCreated} />
 
-          {/* Feed */}
           {loading ? (
-            <div className="space-y-4">
-              {[1, 2, 3].map((i) => (
-                <div
-                  key={i}
-                  className="h-48 bg-zinc-900 rounded-2xl animate-pulse"
-                />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              {[1,2,3].map(i => (
+                <div key={i} style={{
+                  height: '200px', background: '#18181b', borderRadius: '16px',
+                  border: '1px solid #27272a', animation: 'pulse 2s infinite'
+                }} />
               ))}
             </div>
           ) : error ? (
-            <div className="text-center py-12">
-              <p className="text-red-400">{error}</p>
+            <div style={{
+              textAlign: 'center', padding: '60px 20px',
+              background: '#18181b', borderRadius: '16px', border: '1px solid #27272a'
+            }}>
+              <div style={{ fontSize: '2rem', marginBottom: '12px' }}>⚠️</div>
+              <p style={{ color: '#f87171' }}>{error}</p>
             </div>
           ) : posts.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-gray-400 text-lg mb-2">Your feed is empty</p>
-              <p className="text-gray-500 text-sm">
+            <div style={{
+              textAlign: 'center', padding: '80px 20px',
+              background: '#18181b', borderRadius: '20px',
+              border: '1px solid #27272a'
+            }}>
+              <div style={{ fontSize: '3rem', marginBottom: '16px' }}>🌍</div>
+              <h3 style={{ color: '#fff', fontSize: '1.2rem', fontWeight: '700', margin: '0 0 8px' }}>
+                Your feed is empty
+              </h3>
+              <p style={{ color: '#52525b', fontSize: '0.9rem' }}>
                 Follow some users to see their posts here
               </p>
             </div>
           ) : (
-            <div className="space-y-4">
-              {posts.map((post) => (
-                <PostCard
-                  key={post.id}
-                  post={post}
-                  onDelete={handlePostDeleted}
-                />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              {posts.map(post => (
+                <PostCard key={post.id} post={post} onDelete={handlePostDeleted} />
               ))}
             </div>
           )}
-
         </main>
-
-        {/* Right Sidebar */}
         <RightSidebar />
-
       </div>
     </div>
   )
