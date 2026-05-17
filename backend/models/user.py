@@ -19,6 +19,9 @@ class UpdateProfileModel(BaseModel):
     username: Optional[str] = None
     bio: Optional[str] = None
     email: Optional[EmailStr] = None
+    website: Optional[str] = None
+    location: Optional[str] = None
+    cover_position: Optional[int] = None
 
 # User response (what we send back, no password)
 class UserResponse(BaseModel):

@@ -121,10 +121,13 @@ const Profile = () => {
           }}>
             {profile?.cover_photo ? (
               <img
-                src={profile.cover_photo}
-                alt="Cover"
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-              />
+  src={profile.cover_photo}
+  alt="Cover"
+  style={{
+    width: '100%', height: '100%', objectFit: 'cover',
+    objectPosition: `center ${profile.cover_position ?? 50}%`
+  }}
+/>
             ) : (
               <div style={{
                 width: '100%', height: '100%',
