@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
+import { useTheme } from '../context/ThemeContext'
 import { followUser, unfollowUser, checkFollow } from '../api/axios'
 
 const FollowButton = ({ targetUserId, onFollowChange }) => {
   const { user } = useAuth()
+  const { theme } = useTheme()
   const [isFollowing, setIsFollowing] = useState(false)
   const [loading, setLoading] = useState(false)
   const [checking, setChecking] = useState(true)
@@ -54,9 +56,9 @@ const FollowButton = ({ targetUserId, onFollowChange }) => {
       <button disabled style={{
         padding: '8px 20px', borderRadius: '100px',
         fontSize: '0.8rem', fontWeight: '600',
-        background: '#27272a', color: '#52525b',
-        border: '1px solid #27272a', cursor: 'not-allowed',
-        fontFamily: "'Inter', system-ui, sans-serif"
+        background: theme.surface, color: theme.textMuted,
+        border: `1px solid ${theme.border}`, cursor: 'not-allowed',
+        fontFamily: theme.font
       }}>
         •••
       </button>
@@ -66,37 +68,38 @@ const FollowButton = ({ targetUserId, onFollowChange }) => {
   const getStyle = () => {
     if (loading) {
       return {
-        background: '#27272a', color: '#71717a',
-        border: '1px solid #27272a', cursor: 'not-allowed', opacity: 0.7
+        background: theme.surface, color: theme.textMuted,
+        border: `1px solid ${theme.border}`,
+        cursor: 'not-allowed', opacity: 0.7
       }
     }
     if (isFollowing && hovered) {
       return {
-        background: 'rgba(239,68,68,0.1)',
-        border: '1px solid rgba(239,68,68,0.35)',
-        color: '#f87171', cursor: 'pointer'
+        background: theme.dangerMuted,
+        border: `1px solid ${theme.dangerBorder}`,
+        color: theme.danger, cursor: 'pointer'
       }
     }
     if (isFollowing) {
       return {
-        background: 'rgba(255,255,255,0.05)',
-        border: '1px solid #3f3f46',
-        color: '#d4d4d8', cursor: 'pointer'
+        background: theme.surface,
+        border: `1px solid ${theme.borderHover}`,
+        color: theme.textSecondary, cursor: 'pointer'
       }
     }
     if (hovered) {
       return {
-        background: 'linear-gradient(135deg, #1d4ed8, #1e40af)',
+        background: `linear-gradient(135deg, ${theme.accentHover}, ${theme.accent})`,
         border: '1px solid transparent',
         color: '#fff', cursor: 'pointer',
-        boxShadow: '0 4px 20px rgba(37,99,235,0.4)'
+        boxShadow: `0 4px 20px ${theme.accentMuted}`
       }
     }
     return {
-      background: 'linear-gradient(135deg, #2563EB, #1d4ed8)',
+      background: `linear-gradient(135deg, ${theme.accent}, ${theme.accentHover})`,
       border: '1px solid transparent',
       color: '#fff', cursor: 'pointer',
-      boxShadow: '0 4px 16px rgba(37,99,235,0.3)'
+      boxShadow: `0 4px 16px ${theme.accentMuted}`
     }
   }
 
@@ -109,8 +112,7 @@ const FollowButton = ({ targetUserId, onFollowChange }) => {
       style={{
         padding: '8px 20px', borderRadius: '100px',
         fontSize: '0.8rem', fontWeight: '700',
-        transition: 'all 0.2s',
-        fontFamily: "'Inter', system-ui, sans-serif",
+        transition: 'all 0.2s', fontFamily: theme.font,
         letterSpacing: '0.3px',
         display: 'flex', alignItems: 'center', gap: '6px',
         ...getStyle()
