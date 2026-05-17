@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
+import { useTheme } from '../context/ThemeContext'
 import { createPost, uploadMedia } from '../api/axios'
 
 const CreatePost = ({ onPostCreated }) => {
   const { user } = useAuth()
+  const { theme } = useTheme()
   const [content, setContent] = useState('')
   const [file, setFile] = useState(null)
   const [preview, setPreview] = useState(null)
@@ -49,28 +51,32 @@ const CreatePost = ({ onPostCreated }) => {
     }
   }
 
+  const canPost = content.trim() || file
+
   return (
     <div style={{
-      background: '#18181b', border: `1px solid ${focused ? 'rgba(37,99,235,0.4)' : '#27272a'}`,
+      background: theme.card,
+      border: `1px solid ${focused ? theme.accentBorder : theme.border}`,
       borderRadius: '20px', padding: '20px', marginBottom: '20px',
-      transition: 'border-color 0.2s',
-      boxShadow: focused ? '0 0 0 3px rgba(37,99,235,0.08)' : 'none',
-      fontFamily: "'Inter', system-ui, sans-serif"
+      transition: 'all 0.2s',
+      boxShadow: focused ? `0 0 0 3px ${theme.accentMuted}` : 'none',
+      fontFamily: theme.font
     }}>
 
       {/* Top area */}
       <div style={{ display: 'flex', gap: '14px' }}>
+
         {/* Avatar */}
         <div style={{ flexShrink: 0 }}>
           {user?.profile_picture ? (
             <img src={user.profile_picture} alt={user.name} style={{
               width: '42px', height: '42px', borderRadius: '50%', objectFit: 'cover',
-              border: '2px solid rgba(37,99,235,0.3)'
+              border: `2px solid ${theme.accentBorder}`
             }} />
           ) : (
             <div style={{
               width: '42px', height: '42px', borderRadius: '50%',
-              background: 'linear-gradient(135deg, #2563EB, #7c3aed)',
+              background: theme.avatarGradient,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               color: '#fff', fontWeight: '700', fontSize: '16px'
             }}>
@@ -90,14 +96,17 @@ const CreatePost = ({ onPostCreated }) => {
             rows={focused || content ? 3 : 1}
             style={{
               width: '100%', background: 'transparent',
-              border: 'none', color: '#fff', fontSize: '1rem',
-              resize: 'none', outline: 'none', fontFamily: 'inherit',
+              border: 'none', color: theme.text, fontSize: '1rem',
+              resize: 'none', outline: 'none', fontFamily: theme.font,
               lineHeight: '1.6', transition: 'all 0.2s', boxSizing: 'border-box'
             }}
           />
-          {/* Char count */}
           {content.length > 0 && (
-            <div style={{ textAlign: 'right', color: content.length > 280 ? '#f87171' : '#3f3f50', fontSize: '0.75rem', marginTop: '4px' }}>
+            <div style={{
+              textAlign: 'right',
+              color: content.length > 400 ? theme.danger : theme.textHint,
+              fontSize: '0.75rem', marginTop: '4px'
+            }}>
               {content.length}/500
             </div>
           )}
@@ -110,12 +119,12 @@ const CreatePost = ({ onPostCreated }) => {
           {file?.type.startsWith('image') ? (
             <img src={preview} alt="Preview" style={{
               width: '100%', maxHeight: '280px', objectFit: 'cover',
-              borderRadius: '14px', border: '1px solid #27272a'
+              borderRadius: '14px', border: `1px solid ${theme.border}`
             }} />
           ) : (
             <video src={preview} controls style={{
               width: '100%', maxHeight: '280px', borderRadius: '14px',
-              border: '1px solid #27272a'
+              border: `1px solid ${theme.border}`
             }} />
           )}
           <button onClick={removeFile} style={{
@@ -130,15 +139,23 @@ const CreatePost = ({ onPostCreated }) => {
 
       {/* Error */}
       {error && (
-        <p style={{ color: '#f87171', fontSize: '0.8rem', marginTop: '10px', marginLeft: '56px' }}>⚠️ {error}</p>
+        <p style={{
+          color: theme.danger, fontSize: '0.8rem',
+          marginTop: '10px', marginLeft: '56px'
+        }}>
+          ⚠️ {error}
+        </p>
       )}
 
       {/* Bottom bar */}
       <div style={{
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         marginTop: '16px', paddingTop: '14px',
-        borderTop: '1px solid rgba(255,255,255,0.05)', marginLeft: '56px'
+        borderTop: `1px solid ${theme.border}`,
+        marginLeft: '56px'
       }}>
+
+        {/* Upload buttons */}
         <div style={{ display: 'flex', gap: '8px' }}>
           {[
             { accept: 'image/*', icon: '🖼️', label: 'Photo' },
@@ -147,29 +164,48 @@ const CreatePost = ({ onPostCreated }) => {
             <label key={label} style={{
               display: 'flex', alignItems: 'center', gap: '6px',
               padding: '7px 14px', borderRadius: '100px',
-              background: 'transparent', border: '1px solid #27272a',
-              color: '#71717a', fontSize: '0.8rem', cursor: 'pointer',
-              transition: 'all 0.2s'
+              background: 'transparent', border: `1px solid ${theme.border}`,
+              color: theme.textMuted, fontSize: '0.8rem',
+              cursor: 'pointer', transition: 'all 0.2s'
             }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = '#3f3f46'; e.currentTarget.style.color = '#fff' }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = '#27272a'; e.currentTarget.style.color = '#71717a' }}
+              onMouseEnter={e => {
+                e.currentTarget.style.borderColor = theme.accentBorder
+                e.currentTarget.style.color = theme.accentText
+                e.currentTarget.style.background = theme.accentMuted
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.borderColor = theme.border
+                e.currentTarget.style.color = theme.textMuted
+                e.currentTarget.style.background = 'transparent'
+              }}
             >
-              <span>{icon}</span><span>{label}</span>
+              <span>{icon}</span>
+              <span>{label}</span>
               <input type="file" accept={accept} onChange={handleFileChange} style={{ display: 'none' }} />
             </label>
           ))}
         </div>
 
-        <button onClick={handleSubmit} disabled={loading || (!content.trim() && !file)} style={{
-          background: loading || (!content.trim() && !file)
-            ? '#27272a'
-            : 'linear-gradient(135deg, #2563EB, #1d4ed8)',
-          color: loading || (!content.trim() && !file) ? '#52525b' : '#fff',
-          fontWeight: '700', padding: '9px 22px', borderRadius: '100px',
-          border: 'none', fontSize: '0.9rem', cursor: loading || (!content.trim() && !file) ? 'not-allowed' : 'pointer',
-          transition: 'all 0.2s', fontFamily: 'inherit',
-          boxShadow: !loading && (content.trim() || file) ? '0 4px 16px rgba(37,99,235,0.3)' : 'none'
-        }}>
+        {/* Post button */}
+        <button
+          onClick={handleSubmit}
+          disabled={loading || !canPost}
+          style={{
+            background: loading || !canPost
+              ? theme.surface
+              : `linear-gradient(135deg, ${theme.accent}, ${theme.accentHover})`,
+            color: loading || !canPost ? theme.textMuted : '#fff',
+            fontWeight: '700', padding: '9px 22px', borderRadius: '100px',
+            border: 'none', fontSize: '0.9rem',
+            cursor: loading || !canPost ? 'not-allowed' : 'pointer',
+            transition: 'all 0.2s', fontFamily: theme.font,
+            boxShadow: canPost && !loading
+              ? `0 4px 16px ${theme.accentMuted}`
+              : 'none'
+          }}
+          onMouseEnter={e => { if (canPost && !loading) e.currentTarget.style.transform = 'translateY(-1px)' }}
+          onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)' }}
+        >
           {loading ? '⏳ Posting...' : '✦ Post'}
         </button>
       </div>
