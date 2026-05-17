@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { useTheme } from '../context/ThemeContext'
 import { getComments, addComment, deleteComment } from '../api/axios'
 
 const CommentSection = ({ postId }) => {
   const { user } = useAuth()
+  const { theme } = useTheme()
   const [comments, setComments] = useState([])
   const [content, setContent] = useState('')
   const [loading, setLoading] = useState(false)
@@ -59,19 +61,19 @@ const CommentSection = ({ postId }) => {
   }
 
   return (
-    <div style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+    <div style={{ fontFamily: theme.font }}>
 
       {/* Header */}
       <div style={{
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         marginBottom: '20px'
       }}>
-        <h3 style={{ color: '#fff', fontSize: '1rem', fontWeight: '700', margin: 0 }}>
+        <h3 style={{ color: theme.text, fontSize: '1rem', fontWeight: '700', margin: 0 }}>
           💬 Comments
         </h3>
         <span style={{
-          background: 'rgba(37,99,235,0.1)', border: '1px solid rgba(37,99,235,0.2)',
-          color: '#60a5fa', fontSize: '0.75rem', fontWeight: '700',
+          background: theme.accentMuted, border: `1px solid ${theme.accentBorder}`,
+          color: theme.accentText, fontSize: '0.75rem', fontWeight: '700',
           padding: '3px 10px', borderRadius: '100px'
         }}>
           {comments.length}
@@ -81,11 +83,11 @@ const CommentSection = ({ postId }) => {
       {/* Add comment box */}
       <div style={{
         display: 'flex', gap: '12px', marginBottom: '24px',
-        background: focused ? 'rgba(37,99,235,0.04)' : '#18181b',
-        border: `1px solid ${focused ? 'rgba(37,99,235,0.35)' : '#27272a'}`,
+        background: focused ? theme.accentMuted : theme.card,
+        border: `1px solid ${focused ? theme.accentBorder : theme.border}`,
         borderRadius: '16px', padding: '14px',
         transition: 'all 0.2s',
-        boxShadow: focused ? '0 0 0 3px rgba(37,99,235,0.08)' : 'none'
+        boxShadow: focused ? `0 0 0 3px ${theme.accentMuted}` : 'none'
       }}>
 
         {/* Avatar */}
@@ -93,12 +95,12 @@ const CommentSection = ({ postId }) => {
           {user?.profile_picture ? (
             <img src={user.profile_picture} alt={user.name} style={{
               width: '36px', height: '36px', borderRadius: '50%',
-              objectFit: 'cover', border: '2px solid rgba(37,99,235,0.3)'
+              objectFit: 'cover', border: `2px solid ${theme.accentBorder}`
             }} />
           ) : (
             <div style={{
               width: '36px', height: '36px', borderRadius: '50%',
-              background: 'linear-gradient(135deg, #2563EB, #7c3aed)',
+              background: theme.avatarGradient,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               color: '#fff', fontSize: '13px', fontWeight: '700'
             }}>
@@ -119,29 +121,28 @@ const CommentSection = ({ postId }) => {
             placeholder={`Reply as ${user?.name?.split(' ')[0]}...`}
             style={{
               width: '100%', background: 'transparent',
-              border: 'none', color: '#fff',
+              border: 'none', color: theme.text,
               fontSize: '0.9rem', outline: 'none',
-              fontFamily: 'inherit', boxSizing: 'border-box'
+              fontFamily: theme.font, boxSizing: 'border-box'
             }}
           />
 
-          {/* Action bar — shown when focused or has content */}
           {(focused || content) && (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <span style={{ color: '#3f3f50', fontSize: '0.72rem' }}>
+              <span style={{ color: theme.textHint, fontSize: '0.72rem' }}>
                 Press Enter to post
               </span>
               <div style={{ display: 'flex', gap: '8px' }}>
                 <button
                   onClick={() => { setContent(''); setFocused(false) }}
                   style={{
-                    background: 'transparent', border: '1px solid #27272a',
-                    color: '#71717a', borderRadius: '100px',
+                    background: 'transparent', border: `1px solid ${theme.border}`,
+                    color: theme.textMuted, borderRadius: '100px',
                     padding: '5px 14px', fontSize: '0.8rem',
-                    cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s'
+                    cursor: 'pointer', fontFamily: theme.font, transition: 'all 0.2s'
                   }}
-                  onMouseEnter={e => { e.currentTarget.style.borderColor = '#3f3f46'; e.currentTarget.style.color = '#fff' }}
-                  onMouseLeave={e => { e.currentTarget.style.borderColor = '#27272a'; e.currentTarget.style.color = '#71717a' }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = theme.borderHover; e.currentTarget.style.color = theme.text }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = theme.border; e.currentTarget.style.color = theme.textMuted }}
                 >
                   Cancel
                 </button>
@@ -150,14 +151,17 @@ const CommentSection = ({ postId }) => {
                   disabled={loading || !content.trim()}
                   style={{
                     background: loading || !content.trim()
-                      ? '#27272a'
-                      : 'linear-gradient(135deg, #2563EB, #1d4ed8)',
-                    border: 'none', color: loading || !content.trim() ? '#52525b' : '#fff',
+                      ? theme.surface
+                      : `linear-gradient(135deg, ${theme.accent}, ${theme.accentHover})`,
+                    border: 'none',
+                    color: loading || !content.trim() ? theme.textMuted : '#fff',
                     borderRadius: '100px', padding: '5px 16px',
                     fontSize: '0.8rem', fontWeight: '700',
                     cursor: loading || !content.trim() ? 'not-allowed' : 'pointer',
-                    fontFamily: 'inherit', transition: 'all 0.2s',
-                    boxShadow: !loading && content.trim() ? '0 4px 12px rgba(37,99,235,0.3)' : 'none'
+                    fontFamily: theme.font, transition: 'all 0.2s',
+                    boxShadow: !loading && content.trim()
+                      ? `0 4px 12px ${theme.accentMuted}`
+                      : 'none'
                   }}
                 >
                   {loading ? '⏳' : '✦ Post'}
@@ -173,22 +177,22 @@ const CommentSection = ({ postId }) => {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           {[1, 2, 3].map(i => (
             <div key={i} style={{
-              height: '72px', background: '#18181b', borderRadius: '14px',
-              border: '1px solid #27272a'
+              height: '72px', background: theme.card, borderRadius: '14px',
+              border: `1px solid ${theme.border}`
             }} />
           ))}
         </div>
       ) : comments.length === 0 ? (
         <div style={{
           textAlign: 'center', padding: '40px 20px',
-          background: '#18181b', borderRadius: '16px',
-          border: '1px solid #27272a'
+          background: theme.card, borderRadius: '16px',
+          border: `1px solid ${theme.border}`
         }}>
           <div style={{ fontSize: '2rem', marginBottom: '10px' }}>💬</div>
-          <p style={{ color: '#52525b', fontSize: '0.9rem', fontWeight: '600', margin: '0 0 4px' }}>
+          <p style={{ color: theme.textMuted, fontSize: '0.9rem', fontWeight: '600', margin: '0 0 4px' }}>
             No comments yet
           </p>
-          <p style={{ color: '#3f3f50', fontSize: '0.8rem', margin: 0 }}>
+          <p style={{ color: theme.textHint, fontSize: '0.8rem', margin: 0 }}>
             Be the first to share your thoughts!
           </p>
         </div>
@@ -201,6 +205,7 @@ const CommentSection = ({ postId }) => {
               user={user}
               onDelete={handleDelete}
               timeAgo={timeAgo}
+              theme={theme}
             />
           ))}
         </div>
@@ -209,7 +214,7 @@ const CommentSection = ({ postId }) => {
   )
 }
 
-const CommentItem = ({ comment, user, onDelete, timeAgo }) => {
+const CommentItem = ({ comment, user, onDelete, timeAgo, theme }) => {
   const [hovered, setHovered] = useState(false)
   const [deleteHovered, setDeleteHovered] = useState(false)
   const isOwner = user?.id === comment.user_id
@@ -221,8 +226,8 @@ const CommentItem = ({ comment, user, onDelete, timeAgo }) => {
       style={{
         display: 'flex', gap: '12px',
         padding: '14px', borderRadius: '16px',
-        background: hovered ? 'rgba(255,255,255,0.03)' : 'transparent',
-        border: `1px solid ${hovered ? 'rgba(255,255,255,0.06)' : 'transparent'}`,
+        background: hovered ? theme.surface : 'transparent',
+        border: `1px solid ${hovered ? theme.border : 'transparent'}`,
         transition: 'all 0.2s'
       }}
     >
@@ -231,13 +236,12 @@ const CommentItem = ({ comment, user, onDelete, timeAgo }) => {
         {comment.users?.profile_picture ? (
           <img src={comment.users.profile_picture} alt={comment.users.name} style={{
             width: '36px', height: '36px', borderRadius: '50%',
-            objectFit: 'cover', border: '2px solid rgba(37,99,235,0.25)',
-            transition: 'border-color 0.2s'
+            objectFit: 'cover', border: `2px solid ${theme.accentBorder}`
           }} />
         ) : (
           <div style={{
             width: '36px', height: '36px', borderRadius: '50%',
-            background: 'linear-gradient(135deg, #2563EB, #7c3aed)',
+            background: theme.avatarGradient,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             color: '#fff', fontSize: '13px', fontWeight: '700', flexShrink: 0
           }}>
@@ -249,7 +253,7 @@ const CommentItem = ({ comment, user, onDelete, timeAgo }) => {
       {/* Bubble */}
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{
-          background: '#18181b', border: '1px solid #27272a',
+          background: theme.card, border: `1px solid ${theme.border}`,
           borderRadius: '0 14px 14px 14px', padding: '12px 16px'
         }}>
           {/* Name row */}
@@ -260,16 +264,16 @@ const CommentItem = ({ comment, user, onDelete, timeAgo }) => {
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <Link to={`/profile/${comment.users?.username}`} style={{ textDecoration: 'none' }}>
                 <span style={{
-                  color: '#e4e4e7', fontSize: '0.875rem', fontWeight: '700',
+                  color: theme.text, fontSize: '0.875rem', fontWeight: '700',
                   transition: 'color 0.2s'
                 }}
-                  onMouseEnter={e => e.currentTarget.style.color = '#60a5fa'}
-                  onMouseLeave={e => e.currentTarget.style.color = '#e4e4e7'}
+                  onMouseEnter={e => e.currentTarget.style.color = theme.accentText}
+                  onMouseLeave={e => e.currentTarget.style.color = theme.text}
                 >
                   {comment.users?.name}
                 </span>
               </Link>
-              <span style={{ color: '#3f3f50', fontSize: '0.72rem' }}>
+              <span style={{ color: theme.textHint, fontSize: '0.72rem' }}>
                 @{comment.users?.username}
               </span>
             </div>
@@ -280,11 +284,12 @@ const CommentItem = ({ comment, user, onDelete, timeAgo }) => {
                 onMouseEnter={() => setDeleteHovered(true)}
                 onMouseLeave={() => setDeleteHovered(false)}
                 style={{
-                  background: deleteHovered ? 'rgba(239,68,68,0.1)' : 'transparent',
-                  border: 'none', color: deleteHovered ? '#f87171' : '#3f3f50',
+                  background: deleteHovered ? theme.dangerMuted : 'transparent',
+                  border: 'none',
+                  color: deleteHovered ? theme.danger : theme.textHint,
                   borderRadius: '6px', padding: '3px 8px',
                   fontSize: '0.72rem', cursor: 'pointer',
-                  fontFamily: 'inherit', transition: 'all 0.2s',
+                  fontFamily: theme.font, transition: 'all 0.2s',
                   display: 'flex', alignItems: 'center', gap: '4px'
                 }}
               >
@@ -295,7 +300,7 @@ const CommentItem = ({ comment, user, onDelete, timeAgo }) => {
 
           {/* Content */}
           <p style={{
-            color: '#a1a1aa', fontSize: '0.9rem',
+            color: theme.textSecondary, fontSize: '0.9rem',
             lineHeight: '1.55', margin: 0
           }}>
             {comment.content}
@@ -307,26 +312,26 @@ const CommentItem = ({ comment, user, onDelete, timeAgo }) => {
           display: 'flex', alignItems: 'center', gap: '12px',
           marginTop: '6px', paddingLeft: '4px'
         }}>
-          <span style={{ color: '#3f3f50', fontSize: '0.72rem' }}>
+          <span style={{ color: theme.textHint, fontSize: '0.72rem' }}>
             {timeAgo(comment.created_at)}
           </span>
           <button style={{
-            background: 'none', border: 'none', color: '#3f3f50',
-            fontSize: '0.72rem', cursor: 'pointer', fontFamily: 'inherit',
+            background: 'none', border: 'none', color: theme.textHint,
+            fontSize: '0.72rem', cursor: 'pointer', fontFamily: theme.font,
             transition: 'color 0.2s', padding: 0
           }}
-            onMouseEnter={e => e.currentTarget.style.color = '#60a5fa'}
-            onMouseLeave={e => e.currentTarget.style.color = '#3f3f50'}
+            onMouseEnter={e => e.currentTarget.style.color = theme.accentText}
+            onMouseLeave={e => e.currentTarget.style.color = theme.textHint}
           >
             👍 Like
           </button>
           <button style={{
-            background: 'none', border: 'none', color: '#3f3f50',
-            fontSize: '0.72rem', cursor: 'pointer', fontFamily: 'inherit',
+            background: 'none', border: 'none', color: theme.textHint,
+            fontSize: '0.72rem', cursor: 'pointer', fontFamily: theme.font,
             transition: 'color 0.2s', padding: 0
           }}
-            onMouseEnter={e => e.currentTarget.style.color = '#60a5fa'}
-            onMouseLeave={e => e.currentTarget.style.color = '#3f3f50'}
+            onMouseEnter={e => e.currentTarget.style.color = theme.accentText}
+            onMouseLeave={e => e.currentTarget.style.color = theme.textHint}
           >
             ↩️ Reply
           </button>
