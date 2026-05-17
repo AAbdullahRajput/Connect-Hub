@@ -4,10 +4,12 @@ import LeftSidebar from '../components/LeftSidebar'
 import RightSidebar from '../components/RightSidebar'
 import CreatePost from '../components/CreatePost'
 import PostCard from '../components/PostCard'
+import { useTheme } from '../context/ThemeContext'
 import { getFeedPosts } from '../api/axios'
 import { onPostCreated, removeSocketListeners } from '../socket/socket'
 
 const Home = () => {
+  const { theme } = useTheme()
   const [posts, setPosts] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -33,22 +35,39 @@ const Home = () => {
 
   return (
     <div style={{
-      minHeight: '100vh', backgroundColor: '#000',
-      fontFamily: "'Inter', system-ui, sans-serif", color: '#fff'
+      minHeight: '100vh',
+      backgroundColor: theme.bg,
+      fontFamily: theme.font,
+      color: theme.text
     }}>
       <Navbar />
-      <div style={{ display: 'flex', maxWidth: '1400px', margin: '0 auto', paddingTop: '64px' }}>
+      <div style={{
+        display: 'flex',
+        maxWidth: '1400px',
+        margin: '0 auto',
+        paddingTop: '64px'
+      }}>
         <LeftSidebar />
+
         <main style={{
-          flex: 1, marginLeft: '260px', marginRight: '300px',
-          padding: '28px 24px', minHeight: 'calc(100vh - 64px)'
+          flex: 1,
+          marginLeft: '260px',
+          marginRight: '300px',
+          padding: '28px 24px',
+          minHeight: 'calc(100vh - 64px)'
         }}>
           {/* Page header */}
           <div style={{ marginBottom: '24px' }}>
-            <h1 style={{ color: '#fff', fontSize: '1.5rem', fontWeight: '700', margin: '0 0 4px', letterSpacing: '-0.5px' }}>
+            <h1 style={{
+              color: theme.text,
+              fontSize: '1.5rem',
+              fontWeight: '800',
+              margin: '0 0 4px',
+              letterSpacing: '-0.5px'
+            }}>
               Home Feed
             </h1>
-            <p style={{ color: '#52525b', fontSize: '0.875rem', margin: 0 }}>
+            <p style={{ color: theme.textMuted, fontSize: '0.875rem', margin: 0 }}>
               Latest posts from people you follow
             </p>
           </div>
@@ -57,32 +76,44 @@ const Home = () => {
 
           {loading ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              {[1,2,3].map(i => (
+              {[1, 2, 3].map(i => (
                 <div key={i} style={{
-                  height: '200px', background: '#18181b', borderRadius: '16px',
-                  border: '1px solid #27272a', animation: 'pulse 2s infinite'
+                  height: '200px',
+                  background: theme.card,
+                  borderRadius: '20px',
+                  border: `1px solid ${theme.border}`
                 }} />
               ))}
             </div>
           ) : error ? (
             <div style={{
-              textAlign: 'center', padding: '60px 20px',
-              background: '#18181b', borderRadius: '16px', border: '1px solid #27272a'
+              textAlign: 'center',
+              padding: '60px 20px',
+              background: theme.card,
+              borderRadius: '20px',
+              border: `1px solid ${theme.border}`
             }}>
               <div style={{ fontSize: '2rem', marginBottom: '12px' }}>⚠️</div>
-              <p style={{ color: '#f87171' }}>{error}</p>
+              <p style={{ color: theme.danger, fontWeight: '600' }}>{error}</p>
             </div>
           ) : posts.length === 0 ? (
             <div style={{
-              textAlign: 'center', padding: '80px 20px',
-              background: '#18181b', borderRadius: '20px',
-              border: '1px solid #27272a'
+              textAlign: 'center',
+              padding: '80px 20px',
+              background: theme.card,
+              borderRadius: '20px',
+              border: `1px solid ${theme.border}`
             }}>
               <div style={{ fontSize: '3rem', marginBottom: '16px' }}>🌍</div>
-              <h3 style={{ color: '#fff', fontSize: '1.2rem', fontWeight: '700', margin: '0 0 8px' }}>
+              <h3 style={{
+                color: theme.text,
+                fontSize: '1.2rem',
+                fontWeight: '700',
+                margin: '0 0 8px'
+              }}>
                 Your feed is empty
               </h3>
-              <p style={{ color: '#52525b', fontSize: '0.9rem' }}>
+              <p style={{ color: theme.textMuted, fontSize: '0.9rem', margin: 0 }}>
                 Follow some users to see their posts here
               </p>
             </div>
@@ -94,6 +125,7 @@ const Home = () => {
             </div>
           )}
         </main>
+
         <RightSidebar />
       </div>
     </div>
