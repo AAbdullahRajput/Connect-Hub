@@ -11,6 +11,7 @@ import EditProfile from './pages/EditProfile'
 import PostDetails from './pages/PostDetails'
 import Search from './pages/Search'
 import Followers from './pages/Followers'
+import Settings from './pages/Settings'
 
 // Protected route wrapper
 const ProtectedRoute = ({ children }) => {
@@ -59,7 +60,9 @@ const AppRoutes = () => {
         <Route path="/profile/:username/followers" element={
           <ProtectedRoute><Followers /></ProtectedRoute>
         } />
-
+        <Route path="/settings" element={
+          <ProtectedRoute><Settings /></ProtectedRoute>
+        } />
         {/* Default redirect */}
         <Route path="/" element={<Navigate to="/home" replace />} />
         <Route path="*" element={<Navigate to="/home" replace />} />
