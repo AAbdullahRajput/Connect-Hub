@@ -12,6 +12,7 @@ from routes.commentRoutes import router as comment_router
 from routes.userRoutes import router as user_router
 from routes.followRoutes import router as follow_router
 from routes.searchRoutes import router as search_router
+from routes.mediaRoutes import router as media_router
 
 
 load_dotenv()
@@ -40,6 +41,7 @@ app.include_router(comment_router, prefix="/api/posts", tags=["Comments"])
 app.include_router(user_router, prefix="/api/users", tags=["Users"])
 app.include_router(follow_router, prefix="/api/users", tags=["Follow"])
 app.include_router(search_router, prefix="/api/search", tags=["Search"])
+app.include_router(media_router, prefix="/api/media", tags=["Media"])
 
 # Socket.io events
 @sio.event
