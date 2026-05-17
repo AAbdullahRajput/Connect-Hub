@@ -1,10 +1,13 @@
+# Backend
 backend/.env
 backend/__pycache__/
 backend/*.pyc
-mobile/.dart_tool/
-mobile/build/
-frontend/node_modules/
-frontend/.env
+
+# Frontend
 frontend/node_modules/
 frontend/.env
 frontend/dist/
+
+# Mobile
+mobile/.dart_tool/
+mobile/build/
