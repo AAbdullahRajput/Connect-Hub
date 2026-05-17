@@ -5,11 +5,13 @@ import LeftSidebar from '../components/LeftSidebar'
 import PostCard from '../components/PostCard'
 import FollowButton from '../components/FollowButton'
 import { useAuth } from '../context/AuthContext'
+import { useTheme } from '../context/ThemeContext'
 import { getUserProfile, getAllPosts } from '../api/axios'
 
 const Profile = () => {
   const { username } = useParams()
   const { user: currentUser } = useAuth()
+  const { theme } = useTheme()
   const navigate = useNavigate()
   const [profile, setProfile] = useState(null)
   const [posts, setPosts] = useState([])
@@ -26,14 +28,11 @@ const Profile = () => {
         const profileRes = await getUserProfile(username)
         setProfile(profileRes.data.user)
         setFollowersCount(profileRes.data.user.followers_count)
-
-        // Get all posts and filter by this user
         const postsRes = await getAllPosts()
         const userPosts = postsRes.data.posts.filter(
           p => p.user_id === profileRes.data.user.id
         )
         setPosts(userPosts)
-
       } catch (err) {
         setError('User not found')
       } finally {
@@ -53,13 +52,22 @@ const Profile = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black text-white">
+      <div style={{
+        minHeight: '100vh', backgroundColor: theme.bg, fontFamily: theme.font
+      }}>
         <Navbar />
-        <div className="max-w-6xl mx-auto flex pt-16">
+        <div style={{ display: 'flex', maxWidth: '1400px', margin: '0 auto', paddingTop: '64px' }}>
           <LeftSidebar />
-          <main className="flex-1 lg:ml-64 px-4 py-6 max-w-2xl mx-auto w-full">
-            <div className="h-48 bg-zinc-900 rounded-2xl animate-pulse mb-4" />
-            <div className="h-24 bg-zinc-900 rounded-2xl animate-pulse" />
+          <main style={{ flex: 1, marginLeft: '260px', padding: '28px 24px' }}>
+            <div style={{
+              height: '200px', background: theme.card,
+              borderRadius: '20px', border: `1px solid ${theme.border}`,
+              marginBottom: '16px'
+            }} />
+            <div style={{
+              height: '120px', background: theme.card,
+              borderRadius: '20px', border: `1px solid ${theme.border}`
+            }} />
           </main>
         </div>
       </div>
@@ -68,64 +76,123 @@ const Profile = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center">
-        <p className="text-red-400">{error}</p>
+      <div style={{
+        minHeight: '100vh', backgroundColor: theme.bg, fontFamily: theme.font,
+        display: 'flex', alignItems: 'center', justifyContent: 'center'
+      }}>
+        <p style={{ color: theme.danger }}>{error}</p>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-black text-white">
-
-      {/* Navbar */}
+    <div style={{
+      minHeight: '100vh',
+      backgroundColor: theme.bg,
+      fontFamily: theme.font,
+      color: theme.text
+    }}>
       <Navbar />
 
-      <div className="max-w-6xl mx-auto flex pt-16">
-
-        {/* Left Sidebar */}
+      <div style={{
+        display: 'flex',
+        maxWidth: '1400px',
+        margin: '0 auto',
+        paddingTop: '64px'
+      }}>
         <LeftSidebar />
 
-        {/* Main content */}
-        <main className="flex-1 lg:ml-64 px-4 py-6 max-w-2xl mx-auto w-full">
-
+        <main style={{
+          flex: 1,
+          marginLeft: '260px',
+          padding: '28px 24px',
+          maxWidth: '720px',
+          minHeight: 'calc(100vh - 64px)'
+        }}>
           {/* Cover photo */}
-          <div className="relative h-48 bg-zinc-900 rounded-2xl overflow-hidden mb-4">
+          <div style={{
+            position: 'relative',
+            height: '200px',
+            background: theme.card,
+            borderRadius: '20px',
+            overflow: 'hidden',
+            marginBottom: '16px',
+            border: `1px solid ${theme.border}`
+          }}>
             {profile?.cover_photo ? (
               <img
                 src={profile.cover_photo}
                 alt="Cover"
-                className="w-full h-full object-cover"
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
               />
             ) : (
-              <div className="w-full h-full bg-gradient-to-br from-blue-900/40 to-zinc-900" />
+              <div style={{
+                width: '100%', height: '100%',
+                background: `linear-gradient(135deg, ${theme.accentMuted}, ${theme.surface})`
+              }} />
             )}
           </div>
 
-          {/* Profile info */}
-          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 mb-6 -mt-12 relative">
-
-            {/* Avatar */}
-            <div className="flex items-end justify-between mb-4">
-              <div className="w-20 h-20 rounded-full border-4 border-zinc-900 overflow-hidden -mt-10 bg-blue-600 flex items-center justify-center">
+          {/* Profile info card */}
+          <div style={{
+            background: theme.card,
+            border: `1px solid ${theme.border}`,
+            borderRadius: '20px',
+            padding: '24px',
+            marginBottom: '24px',
+            marginTop: '-48px',
+            position: 'relative'
+          }}>
+            {/* Avatar + actions row */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'flex-end',
+              justifyContent: 'space-between',
+              marginBottom: '16px'
+            }}>
+              <div style={{
+                width: '80px', height: '80px', borderRadius: '50%',
+                overflow: 'hidden', marginTop: '-20px',
+                border: `4px solid ${theme.card}`,
+                background: theme.avatarGradient,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                color: '#fff', fontSize: '28px', fontWeight: '700', flexShrink: 0
+              }}>
                 {profile?.profile_picture ? (
                   <img
                     src={profile.profile_picture}
                     alt={profile.name}
-                    className="w-full h-full object-cover"
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                   />
                 ) : (
-                  <span className="text-white text-2xl font-bold">
-                    {profile?.name?.[0]?.toUpperCase()}
-                  </span>
+                  profile?.name?.[0]?.toUpperCase()
                 )}
               </div>
 
-              {/* Action buttons */}
-              <div className="flex gap-2">
+              <div style={{ display: 'flex', gap: '8px' }}>
                 {isOwnProfile ? (
                   <button
                     onClick={() => navigate('/profile/edit')}
-                    className="px-4 py-2 rounded-full text-sm font-semibold bg-zinc-800 border border-zinc-600 text-white hover:bg-zinc-700 transition"
+                    style={{
+                      padding: '8px 18px',
+                      background: theme.card,
+                      border: `1px solid ${theme.border}`,
+                      color: theme.textSecondary,
+                      borderRadius: '100px',
+                      fontSize: '0.875rem',
+                      fontWeight: '600',
+                      cursor: 'pointer',
+                      fontFamily: theme.font,
+                      transition: 'all 0.2s'
+                    }}
+                    onMouseEnter={e => {
+                      e.currentTarget.style.borderColor = theme.borderHover
+                      e.currentTarget.style.color = theme.text
+                    }}
+                    onMouseLeave={e => {
+                      e.currentTarget.style.borderColor = theme.border
+                      e.currentTarget.style.color = theme.textSecondary
+                    }}
                   >
                     Edit Profile
                   </button>
@@ -138,53 +205,112 @@ const Profile = () => {
               </div>
             </div>
 
-            {/* Name & username */}
-            <h1 className="text-white text-xl font-bold">{profile?.name}</h1>
-            <p className="text-gray-400 text-sm mb-3">@{profile?.username}</p>
+            {/* Name */}
+            <h1 style={{
+              color: theme.text,
+              fontSize: '1.3rem',
+              fontWeight: '800',
+              margin: '0 0 2px',
+              letterSpacing: '-0.3px'
+            }}>
+              {profile?.name}
+            </h1>
+            <p style={{ color: theme.textMuted, fontSize: '0.875rem', margin: '0 0 12px' }}>
+              @{profile?.username}
+            </p>
 
             {/* Bio */}
             {profile?.bio && (
-              <p className="text-gray-300 text-sm mb-4">{profile.bio}</p>
+              <p style={{
+                color: theme.textSecondary,
+                fontSize: '0.9rem',
+                lineHeight: '1.6',
+                margin: '0 0 16px'
+              }}>
+                {profile.bio}
+              </p>
             )}
 
             {/* Stats */}
-            <div className="flex gap-6">
-              <div className="text-center">
-                <p className="text-white font-bold">{posts.length}</p>
-                <p className="text-gray-400 text-xs">Posts</p>
-              </div>
-              <Link
-                to={`/profile/${username}/followers`}
-                className="text-center hover:opacity-80 transition"
-              >
-                <p className="text-white font-bold">{followersCount}</p>
-                <p className="text-gray-400 text-xs">Followers</p>
-              </Link>
-              <Link
-                to={`/profile/${username}/followers`}
-                className="text-center hover:opacity-80 transition"
-              >
-                <p className="text-white font-bold">{profile?.following_count}</p>
-                <p className="text-gray-400 text-xs">Following</p>
-              </Link>
+            <div style={{
+              display: 'flex',
+              gap: '0',
+              paddingTop: '16px',
+              borderTop: `1px solid ${theme.border}`
+            }}>
+              {[
+                { val: posts.length, label: 'Posts', link: null },
+                { val: followersCount, label: 'Followers', link: `/profile/${username}/followers` },
+                { val: profile?.following_count || 0, label: 'Following', link: `/profile/${username}/followers` },
+              ].map(({ val, label, link }, i) => {
+                const content = (
+                  <div style={{
+                    flex: 1, textAlign: 'center', padding: '8px 0',
+                    borderRight: i < 2 ? `1px solid ${theme.border}` : 'none',
+                    cursor: link ? 'pointer' : 'default',
+                    transition: 'opacity 0.2s'
+                  }}>
+                    <p style={{
+                      color: theme.text, fontWeight: '800',
+                      fontSize: '1.1rem', margin: '0 0 2px'
+                    }}>
+                      {val}
+                    </p>
+                    <p style={{
+                      color: theme.textMuted, fontSize: '0.72rem',
+                      fontWeight: '600', margin: 0,
+                      textTransform: 'uppercase', letterSpacing: '0.5px'
+                    }}>
+                      {label}
+                    </p>
+                  </div>
+                )
+                return link ? (
+                  <Link key={label} to={link} style={{ flex: 1, textDecoration: 'none' }}
+                    onMouseEnter={e => e.currentTarget.style.opacity = '0.7'}
+                    onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+                  >
+                    {content}
+                  </Link>
+                ) : (
+                  <div key={label} style={{ flex: 1 }}>{content}</div>
+                )
+              })}
             </div>
-
           </div>
 
           {/* Posts */}
-          <h2 className="text-white font-semibold mb-4">Posts</h2>
+          <div style={{ marginBottom: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <h2 style={{
+              color: theme.text, fontSize: '1rem',
+              fontWeight: '700', margin: 0
+            }}>
+              Posts
+            </h2>
+            <span style={{
+              background: theme.accentMuted, border: `1px solid ${theme.accentBorder}`,
+              color: theme.accentText, fontSize: '0.75rem', fontWeight: '700',
+              padding: '3px 10px', borderRadius: '100px'
+            }}>
+              {posts.length}
+            </span>
+          </div>
+
           {posts.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-gray-400">No posts yet</p>
+            <div style={{
+              textAlign: 'center', padding: '60px 20px',
+              background: theme.card, borderRadius: '20px',
+              border: `1px solid ${theme.border}`
+            }}>
+              <div style={{ fontSize: '2.5rem', marginBottom: '12px' }}>📭</div>
+              <p style={{ color: theme.textMuted, fontSize: '0.9rem', margin: 0 }}>
+                No posts yet
+              </p>
             </div>
           ) : (
-            <div className="space-y-4">
-              {posts.map((post) => (
-                <PostCard
-                  key={post.id}
-                  post={post}
-                  onDelete={handlePostDeleted}
-                />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              {posts.map(post => (
+                <PostCard key={post.id} post={post} onDelete={handlePostDeleted} />
               ))}
             </div>
           )}
