@@ -15,12 +15,14 @@ import Followers from './pages/Followers'
 import Settings from './pages/Settings'
 
 const ProtectedRoute = ({ children }) => {
-  const { isLoggedIn } = useAuth()
+  const { isLoggedIn, loading } = useAuth()
+  if (loading) return null
   return isLoggedIn ? children : <Navigate to="/login" replace />
 }
 
 const PublicRoute = ({ children }) => {
-  const { isLoggedIn } = useAuth()
+  const { isLoggedIn, loading } = useAuth()
+  if (loading) return null
   return !isLoggedIn ? children : <Navigate to="/home" replace />
 }
 
