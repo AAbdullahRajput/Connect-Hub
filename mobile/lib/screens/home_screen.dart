@@ -54,7 +54,6 @@ class _HomeScreenState extends State<HomeScreen> {
         'post_type': 'text',
       });
       _postController.clear();
-      // Add new post to top of feed
       setState(() => _posts = [res.data['post'], ..._posts]);
       if (mounted) Navigator.pop(context);
     } catch (e) {
@@ -88,7 +87,6 @@ class _HomeScreenState extends State<HomeScreen> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Handle
             Center(
               child: Container(
                 width: 40, height: 4,
@@ -99,8 +97,6 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             const SizedBox(height: 20),
-
-            // Header
             const Text(
               'Create Post',
               style: TextStyle(
@@ -110,8 +106,6 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             const SizedBox(height: 16),
-
-            // User row
             Consumer<AuthProvider>(
               builder: (context, auth, _) => Row(
                 children: [
@@ -157,10 +151,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
             ),
-
             const SizedBox(height: 16),
-
-            // Text input
             TextField(
               controller: _postController,
               maxLines: 5,
@@ -172,10 +163,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 border: InputBorder.none,
               ),
             ),
-
             const SizedBox(height: 16),
-
-            // Post button
             SizedBox(
               width: double.infinity,
               height: 48,
@@ -192,8 +180,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ? const SizedBox(
                         width: 20, height: 20,
                         child: CircularProgressIndicator(
-                          color: Colors.white, strokeWidth: 2,
-                        ),
+                          color: Colors.white, strokeWidth: 2),
                       )
                     : const Text(
                         '✦ Post',
@@ -215,16 +202,14 @@ class _HomeScreenState extends State<HomeScreen> {
     if (index == _currentIndex) return;
     setState(() => _currentIndex = index);
     switch (index) {
-      case 0: break; // already home
+      case 0: break;
       case 1:
         Navigator.pushNamed(context, '/explore');
         break;
       case 2:
         final auth = context.read<AuthProvider>();
-        Navigator.pushNamed(
-          context, '/profile',
-          arguments: auth.userUsername,
-        );
+        Navigator.pushNamed(context, '/profile',
+            arguments: auth.userUsername);
         break;
     }
   }
@@ -235,8 +220,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Scaffold(
       backgroundColor: Colors.black,
-
-      // ─── App Bar ──────────────────────────────────────
       appBar: AppBar(
         backgroundColor: Colors.black.withOpacity(0.9),
         elevation: 0,
@@ -265,7 +248,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
         actions: [
-          // Avatar
           GestureDetector(
             onTap: () => Navigator.pushNamed(
               context, '/profile',
@@ -296,12 +278,9 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-
-      // ─── Body ─────────────────────────────────────────
       body: _loading
           ? const Center(
-              child: CircularProgressIndicator(color: Color(0xFF2563EB)),
-            )
+              child: CircularProgressIndicator(color: Color(0xFF2563EB)))
           : _error.isNotEmpty
               ? Center(
                   child: Column(
@@ -309,24 +288,19 @@ class _HomeScreenState extends State<HomeScreen> {
                     children: [
                       const Text('⚠️', style: TextStyle(fontSize: 40)),
                       const SizedBox(height: 12),
-                      Text(
-                        _error,
-                        style: const TextStyle(
-                          color: Color(0xFFF87171),
-                          fontSize: 16,
-                        ),
-                      ),
+                      Text(_error,
+                          style: const TextStyle(
+                              color: Color(0xFFF87171), fontSize: 16)),
                       const SizedBox(height: 16),
                       ElevatedButton(
                         onPressed: _fetchFeed,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF2563EB),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
+                              borderRadius: BorderRadius.circular(10)),
                         ),
                         child: const Text('Retry',
-                          style: TextStyle(color: Colors.white)),
+                            style: TextStyle(color: Colors.white)),
                       ),
                     ],
                   ),
@@ -339,12 +313,13 @@ class _HomeScreenState extends State<HomeScreen> {
                       ? ListView(
                           children: [
                             SizedBox(
-                              height: MediaQuery.of(context).size.height * 0.6,
+                              height:
+                                  MediaQuery.of(context).size.height * 0.6,
                               child: const Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Text('🌍',
-                                    style: TextStyle(fontSize: 48)),
+                                      style: TextStyle(fontSize: 48)),
                                   SizedBox(height: 16),
                                   Text(
                                     'Your feed is empty',
@@ -381,16 +356,12 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ),
                 ),
-
-      // ─── FAB — Create Post ─────────────────────────────
       floatingActionButton: FloatingActionButton(
         onPressed: _showCreatePost,
         backgroundColor: const Color(0xFF2563EB),
         elevation: 4,
         child: const Icon(Icons.add, color: Colors.white, size: 28),
       ),
-
-      // ─── Bottom Nav ───────────────────────────────────
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: _onNavTap,
