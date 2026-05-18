@@ -58,9 +58,10 @@ class _ExploreScreenState extends State<ExploreScreen> {
       if (tab == 'all') {
         _filtered = _posts;
       } else {
-        _filtered = _posts.where((p) =>
-          p['post_type'] == tab || p['post_type'] == 'mixed'
-        ).toList();
+        _filtered = _posts
+            .where((p) =>
+                p['post_type'] == tab || p['post_type'] == 'mixed')
+            .toList();
       }
     });
   }
@@ -77,8 +78,8 @@ class _ExploreScreenState extends State<ExploreScreen> {
         final name = (p['users']?['name'] ?? '').toLowerCase();
         final username = (p['users']?['username'] ?? '').toLowerCase();
         return content.contains(q) ||
-               name.contains(q) ||
-               username.contains(q);
+            name.contains(q) ||
+            username.contains(q);
       }).toList();
     });
   }
@@ -87,8 +88,6 @@ class _ExploreScreenState extends State<ExploreScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-
-      // ─── App Bar ──────────────────────────────────────
       appBar: AppBar(
         backgroundColor: Colors.black,
         elevation: 0,
@@ -102,12 +101,14 @@ class _ExploreScreenState extends State<ExploreScreen> {
             letterSpacing: -0.5,
           ),
         ),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.pop(context),
+        ),
       ),
-
       body: Column(
         children: [
-
-          // ─── Search bar ─────────────────────────────
+          // Search bar
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
             child: TextField(
@@ -117,15 +118,12 @@ class _ExploreScreenState extends State<ExploreScreen> {
               decoration: InputDecoration(
                 hintText: 'Search posts and users...',
                 hintStyle: const TextStyle(color: Color(0xFF52525B)),
-                prefixIcon: const Icon(
-                  Icons.search,
-                  color: Color(0xFF52525B),
-                  size: 20,
-                ),
+                prefixIcon: const Icon(Icons.search,
+                    color: Color(0xFF52525B), size: 20),
                 suffixIcon: _searchController.text.isNotEmpty
                     ? IconButton(
                         icon: const Icon(Icons.clear,
-                          color: Color(0xFF52525B), size: 18),
+                            color: Color(0xFF52525B), size: 18),
                         onPressed: () {
                           _searchController.clear();
                           _applyFilter(_activeTab);
@@ -136,24 +134,26 @@ class _ExploreScreenState extends State<ExploreScreen> {
                 fillColor: const Color(0xFF18181B),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(100),
-                  borderSide: const BorderSide(color: Color(0xFF27272A)),
+                  borderSide:
+                      const BorderSide(color: Color(0xFF27272A)),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(100),
-                  borderSide: const BorderSide(color: Color(0xFF27272A)),
+                  borderSide:
+                      const BorderSide(color: Color(0xFF27272A)),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(100),
                   borderSide: const BorderSide(
-                    color: Color(0xFF2563EB), width: 1.5),
+                      color: Color(0xFF2563EB), width: 1.5),
                 ),
                 contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16, vertical: 12),
+                    horizontal: 16, vertical: 12),
               ),
             ),
           ),
 
-          // ─── Filter tabs ────────────────────────────
+          // Filter tabs
           SizedBox(
             height: 40,
             child: ListView.separated(
@@ -169,7 +169,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 200),
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 16, vertical: 8),
+                        horizontal: 16, vertical: 8),
                     decoration: BoxDecoration(
                       color: isActive
                           ? const Color(0xFF2563EB)
@@ -201,38 +201,37 @@ class _ExploreScreenState extends State<ExploreScreen> {
 
           const SizedBox(height: 12),
 
-          // ─── Posts list ─────────────────────────────
+          // Posts
           Expanded(
             child: _loading
                 ? const Center(
                     child: CircularProgressIndicator(
-                      color: Color(0xFF2563EB)),
-                  )
+                        color: Color(0xFF2563EB)))
                 : _error.isNotEmpty
                     ? Center(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             const Text('⚠️',
-                              style: TextStyle(fontSize: 40)),
+                                style: TextStyle(fontSize: 40)),
                             const SizedBox(height: 12),
                             Text(_error,
-                              style: const TextStyle(
-                                color: Color(0xFFF87171),
-                                fontSize: 16,
-                              ),
-                            ),
+                                style: const TextStyle(
+                                    color: Color(0xFFF87171),
+                                    fontSize: 16)),
                             const SizedBox(height: 16),
                             ElevatedButton(
                               onPressed: _fetchPosts,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF2563EB),
+                                backgroundColor:
+                                    const Color(0xFF2563EB),
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
+                                    borderRadius:
+                                        BorderRadius.circular(10)),
                               ),
                               child: const Text('Retry',
-                                style: TextStyle(color: Colors.white)),
+                                  style:
+                                      TextStyle(color: Colors.white)),
                             ),
                           ],
                         ),
@@ -254,15 +253,16 @@ class _ExploreScreenState extends State<ExploreScreen> {
                                           MainAxisAlignment.center,
                                       children: [
                                         Text('🔍',
-                                          style:
-                                            TextStyle(fontSize: 48)),
+                                            style: TextStyle(
+                                                fontSize: 48)),
                                         SizedBox(height: 16),
                                         Text(
                                           'No posts found',
                                           style: TextStyle(
                                             color: Colors.white,
                                             fontSize: 18,
-                                            fontWeight: FontWeight.w700,
+                                            fontWeight:
+                                                FontWeight.w700,
                                           ),
                                         ),
                                         SizedBox(height: 8),
@@ -280,7 +280,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                               )
                             : ListView.separated(
                                 padding: const EdgeInsets.fromLTRB(
-                                  16, 0, 16, 16),
+                                    16, 0, 16, 16),
                                 itemCount: _filtered.length,
                                 separatorBuilder: (_, __) =>
                                     const SizedBox(height: 12),
