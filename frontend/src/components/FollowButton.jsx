@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext'
 import { useTheme } from '../context/ThemeContext'
 import { followUser, unfollowUser, checkFollow } from '../api/axios'
 
-const FollowButton = ({ targetUserId, onFollowChange }) => {
+const FollowButton = ({ targetUserId, onFollowChange, size = 'md' }) => {
   const { user } = useAuth()
   const { theme } = useTheme()
   const [isFollowing, setIsFollowing] = useState(false)
@@ -20,14 +20,14 @@ const FollowButton = ({ targetUserId, onFollowChange }) => {
       try {
         const res = await checkFollow(targetUserId)
         setIsFollowing(res.data.is_following)
-      } catch (err) {
-        console.error(err)
+      } catch {
+        // silent
       } finally {
         setChecking(false)
       }
     }
     check()
-  }, [targetUserId])
+  }, [targetUserId, user?.id])
 
   if (user?.id === targetUserId) return null
 
@@ -44,23 +44,34 @@ const FollowButton = ({ targetUserId, onFollowChange }) => {
         setIsFollowing(true)
         if (onFollowChange) onFollowChange(true)
       }
-    } catch (err) {
-      console.error(err)
+    } catch {
+      // silent
     } finally {
       setLoading(false)
     }
   }
 
+  const padding = size === 'sm' ? '6px 14px' : '8px 20px'
+  const fontSize = size === 'sm' ? '0.75rem' : '0.82rem'
+
   if (checking) {
     return (
-      <button disabled style={{
-        padding: '8px 20px', borderRadius: '100px',
-        fontSize: '0.8rem', fontWeight: '600',
-        background: theme.surface, color: theme.textMuted,
-        border: `1px solid ${theme.border}`, cursor: 'not-allowed',
-        fontFamily: theme.font
-      }}>
-        •••
+      <button
+        disabled
+        style={{
+          padding,
+          borderRadius: '100px',
+          fontSize,
+          fontWeight: '600',
+          background: theme.surface,
+          color: theme.textMuted,
+          border: `1px solid ${theme.border}`,
+          cursor: 'not-allowed',
+          fontFamily: theme.font,
+          minWidth: '80px',
+        }}
+      >
+        &nbsp;
       </button>
     )
   }
@@ -68,39 +79,71 @@ const FollowButton = ({ targetUserId, onFollowChange }) => {
   const getStyle = () => {
     if (loading) {
       return {
-        background: theme.surface, color: theme.textMuted,
+        background: theme.surface,
+        color: theme.textMuted,
         border: `1px solid ${theme.border}`,
-        cursor: 'not-allowed', opacity: 0.7
+        cursor: 'not-allowed',
+        opacity: 0.7,
       }
     }
     if (isFollowing && hovered) {
       return {
         background: theme.dangerMuted,
         border: `1px solid ${theme.dangerBorder}`,
-        color: theme.danger, cursor: 'pointer'
+        color: theme.danger,
+        cursor: 'pointer',
       }
     }
     if (isFollowing) {
       return {
-        background: theme.surface,
+        background: 'transparent',
         border: `1px solid ${theme.borderHover}`,
-        color: theme.textSecondary, cursor: 'pointer'
-      }
-    }
-    if (hovered) {
-      return {
-        background: `linear-gradient(135deg, ${theme.accentHover}, ${theme.accent})`,
-        border: '1px solid transparent',
-        color: '#fff', cursor: 'pointer',
-        boxShadow: `0 4px 20px ${theme.accentMuted}`
+        color: theme.textSecondary,
+        cursor: 'pointer',
       }
     }
     return {
-      background: `linear-gradient(135deg, ${theme.accent}, ${theme.accentHover})`,
-      border: '1px solid transparent',
-      color: '#fff', cursor: 'pointer',
-      boxShadow: `0 4px 16px ${theme.accentMuted}`
+      background: theme.accent,
+      border: `1px solid transparent`,
+      color: '#fff',
+      cursor: 'pointer',
     }
+  }
+
+  const getLabel = () => {
+    if (loading) return 'Loading'
+    if (isFollowing && hovered) return 'Unfollow'
+    if (isFollowing) return 'Following'
+    return 'Follow'
+  }
+
+  const getIcon = () => {
+    if (loading) {
+      return (
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <circle cx="6" cy="6" r="5" stroke="currentColor" strokeWidth="1.5" strokeDasharray="8 8" />
+        </svg>
+      )
+    }
+    if (isFollowing && hovered) {
+      return (
+        <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
+          <path d="M2 2l7 7M9 2l-7 7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+        </svg>
+      )
+    }
+    if (isFollowing) {
+      return (
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      )
+    }
+    return (
+      <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
+        <path d="M5.5 1v9M1 5.5h9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      </svg>
+    )
   }
 
   return (
@@ -110,23 +153,23 @@ const FollowButton = ({ targetUserId, onFollowChange }) => {
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        padding: '8px 20px', borderRadius: '100px',
-        fontSize: '0.8rem', fontWeight: '700',
-        transition: 'all 0.2s', fontFamily: theme.font,
-        letterSpacing: '0.3px',
-        display: 'flex', alignItems: 'center', gap: '6px',
-        ...getStyle()
+        padding,
+        borderRadius: '100px',
+        fontSize,
+        fontWeight: '600',
+        transition: 'all 0.2s',
+        fontFamily: theme.font,
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '6px',
+        minWidth: '80px',
+        justifyContent: 'center',
+        letterSpacing: '0.01em',
+        ...getStyle(),
       }}
     >
-      {loading ? (
-        <>⏳ <span>Loading</span></>
-      ) : isFollowing && hovered ? (
-        <>✕ <span>Unfollow</span></>
-      ) : isFollowing ? (
-        <>✓ <span>Following</span></>
-      ) : (
-        <>+ <span>Follow</span></>
-      )}
+      {getIcon()}
+      {getLabel()}
     </button>
   )
 }
