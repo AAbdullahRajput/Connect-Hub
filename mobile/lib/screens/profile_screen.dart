@@ -22,15 +22,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    username = ModalRoute.of(context)?.settings.arguments as String?;
-    if (username != null) _loadProfile();
+    final arg =
+        ModalRoute.of(context)?.settings.arguments as String?;
+    if (arg != null && arg != username) {
+      username = arg;
+      _loadProfile();
+    }
   }
 
   Future<void> _loadProfile() async {
+    setState(() => loading = true);
     try {
-      final profileData = await ApiService.getUserProfile(username!);
-      final allPosts = await ApiService.getAllPosts();
-      final userPosts = allPosts
+      final profileRes = await ApiService.getUserProfile(username!);
+      final profileData =
+          profileRes.data['user'] as Map<String, dynamic>;
+
+      final postsRes = await ApiService.getAllPosts();
+      final allPosts = postsRes.data['posts'] ?? [];
+      final userPosts = (allPosts as List)
           .where((p) => p['user_id'] == profileData['id'])
           .toList();
 
@@ -41,12 +50,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
         loading = false;
       });
 
-      // Check follow status
       final auth = context.read<AuthProvider>();
       if (auth.userId != profileData['id']) {
         try {
-          final res = await ApiService.checkFollow(profileData['id']);
-          setState(() => isFollowing = res);
+          final followRes =
+              await ApiService.checkFollow(profileData['id']);
+          setState(
+              () => isFollowing = followRes.data['is_following'] ?? false);
         } catch (_) {}
       }
     } catch (e) {
@@ -60,16 +70,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     try {
       if (isFollowing) {
         await ApiService.unfollowUser(profileId);
-        setState(() {
-          isFollowing = false;
-          followersCount--;
-        });
+        setState(() { isFollowing = false; followersCount--; });
       } else {
         await ApiService.followUser(profileId);
-        setState(() {
-          isFollowing = true;
-          followersCount++;
-        });
+        setState(() { isFollowing = true; followersCount++; });
       }
     } catch (e) {
       debugPrint('Follow error: $e');
@@ -96,21 +100,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
       backgroundColor: Colors.black,
       body: loading
           ? const Center(
-              child: CircularProgressIndicator(color: Color(0xFF2563EB)))
+              child: CircularProgressIndicator(
+                  color: Color(0xFF2563EB)))
           : profile == null
               ? const Center(
                   child: Text('User not found',
-                    style: TextStyle(color: Color(0xFFF87171))))
+                      style: TextStyle(color: Color(0xFFF87171))))
               : CustomScrollView(
                   slivers: [
-
-                    // ─── App Bar with Cover ───────────────
                     SliverAppBar(
                       expandedHeight: 200,
                       pinned: true,
                       backgroundColor: Colors.black,
                       leading: IconButton(
-                        icon: const Icon(Icons.arrow_back, color: Colors.white),
+                        icon: const Icon(Icons.arrow_back,
+                            color: Colors.white),
                         onPressed: () => Navigator.pop(context),
                       ),
                       flexibleSpace: FlexibleSpaceBar(
@@ -124,22 +128,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             : _coverPlaceholder(),
                       ),
                     ),
-
-                    // ─── Profile Info ─────────────────────
                     SliverToBoxAdapter(
                       child: Container(
                         color: const Color(0xFF09090B),
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                          crossAxisAlignment:
+                              CrossAxisAlignment.start,
                           children: [
-
-                            // Avatar + action button row
                             Padding(
-                              padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+                              padding: const EdgeInsets.fromLTRB(
+                                  16, 0, 16, 0),
                               child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.end,
+                                crossAxisAlignment:
+                                    CrossAxisAlignment.end,
                                 children: [
-                                  // Avatar
                                   Transform.translate(
                                     offset: const Offset(0, -36),
                                     child: Container(
@@ -148,7 +150,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       decoration: BoxDecoration(
                                         shape: BoxShape.circle,
                                         border: Border.all(
-                                          color: const Color(0xFF09090B),
+                                          color: const Color(
+                                              0xFF09090B),
                                           width: 4,
                                         ),
                                       ),
@@ -156,46 +159,50 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                         radius: 40,
                                         backgroundColor:
                                             const Color(0xFF2563EB),
-                                        backgroundImage:
-                                            profile?['profile_picture'] != null
-                                                ? NetworkImage(
-                                                    profile!['profile_picture'])
-                                                : null,
-                                        child:
-                                            profile?['profile_picture'] == null
-                                                ? Text(
-                                                    (profile?['name'] ??
-                                                            'U')[0]
-                                                        .toUpperCase(),
-                                                    style: const TextStyle(
-                                                      color: Colors.white,
-                                                      fontSize: 28,
-                                                      fontWeight:
-                                                          FontWeight.w700,
-                                                    ),
-                                                  )
-                                                : null,
+                                        backgroundImage: profile?[
+                                                    'profile_picture'] !=
+                                                null
+                                            ? NetworkImage(profile![
+                                                'profile_picture'])
+                                            : null,
+                                        child: profile?[
+                                                    'profile_picture'] ==
+                                                null
+                                            ? Text(
+                                                (profile?['name'] ??
+                                                        'U')[0]
+                                                    .toUpperCase(),
+                                                style: const TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 28,
+                                                  fontWeight:
+                                                      FontWeight.w700,
+                                                ),
+                                              )
+                                            : null,
                                       ),
                                     ),
                                   ),
-
                                   const Spacer(),
-
-                                  // Action button
                                   Padding(
-                                    padding: const EdgeInsets.only(bottom: 12),
+                                    padding: const EdgeInsets.only(
+                                        bottom: 12),
                                     child: isOwn
                                         ? OutlinedButton(
                                             onPressed: () {},
-                                            style: OutlinedButton.styleFrom(
+                                            style:
+                                                OutlinedButton.styleFrom(
                                               side: const BorderSide(
-                                                  color: Color(0xFF3F3F46)),
-                                              shape: RoundedRectangleBorder(
+                                                  color: Color(
+                                                      0xFF3F3F46)),
+                                              shape:
+                                                  RoundedRectangleBorder(
                                                 borderRadius:
-                                                    BorderRadius.circular(100),
+                                                    BorderRadius
+                                                        .circular(100),
                                               ),
-                                              padding:
-                                                  const EdgeInsets.symmetric(
+                                              padding: const EdgeInsets
+                                                  .symmetric(
                                                       horizontal: 20,
                                                       vertical: 10),
                                             ),
@@ -204,22 +211,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                               style: TextStyle(
                                                 color: Colors.white,
                                                 fontSize: 13,
-                                                fontWeight: FontWeight.w600,
+                                                fontWeight:
+                                                    FontWeight.w600,
                                               ),
                                             ),
                                           )
                                         : ElevatedButton(
                                             onPressed: _toggleFollow,
-                                            style: ElevatedButton.styleFrom(
-                                              backgroundColor: isFollowing
-                                                  ? const Color(0xFF27272A)
-                                                  : const Color(0xFF2563EB),
-                                              shape: RoundedRectangleBorder(
+                                            style:
+                                                ElevatedButton.styleFrom(
+                                              backgroundColor:
+                                                  isFollowing
+                                                      ? const Color(
+                                                          0xFF27272A)
+                                                      : const Color(
+                                                          0xFF2563EB),
+                                              shape:
+                                                  RoundedRectangleBorder(
                                                 borderRadius:
-                                                    BorderRadius.circular(100),
+                                                    BorderRadius
+                                                        .circular(100),
                                               ),
-                                              padding:
-                                                  const EdgeInsets.symmetric(
+                                              padding: const EdgeInsets
+                                                  .symmetric(
                                                       horizontal: 20,
                                                       vertical: 10),
                                             ),
@@ -230,7 +244,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                               style: const TextStyle(
                                                 color: Colors.white,
                                                 fontSize: 13,
-                                                fontWeight: FontWeight.w600,
+                                                fontWeight:
+                                                    FontWeight.w600,
                                               ),
                                             ),
                                           ),
@@ -238,13 +253,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 ],
                               ),
                             ),
-
-                            // Name + username
                             Padding(
-                              padding:
-                                  const EdgeInsets.fromLTRB(16, 0, 16, 4),
+                              padding: const EdgeInsets.fromLTRB(
+                                  16, 0, 16, 4),
                               child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                                crossAxisAlignment:
+                                    CrossAxisAlignment.start,
                                 children: [
                                   Row(
                                     children: [
@@ -276,13 +290,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 ],
                               ),
                             ),
-
-                            // Bio
                             if (profile?['bio'] != null &&
-                                profile!['bio'].toString().isNotEmpty)
+                                profile!['bio']
+                                    .toString()
+                                    .isNotEmpty)
                               Padding(
-                                padding:
-                                    const EdgeInsets.fromLTRB(16, 10, 16, 0),
+                                padding: const EdgeInsets.fromLTRB(
+                                    16, 10, 16, 0),
                                 child: Text(
                                   profile!['bio'],
                                   style: const TextStyle(
@@ -292,11 +306,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   ),
                                 ),
                               ),
-
-                            // Location + join date
                             Padding(
-                              padding:
-                                  const EdgeInsets.fromLTRB(16, 10, 16, 0),
+                              padding: const EdgeInsets.fromLTRB(
+                                  16, 10, 16, 0),
                               child: Wrap(
                                 spacing: 16,
                                 children: [
@@ -304,7 +316,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        const Icon(Icons.location_on_outlined,
+                                        const Icon(
+                                            Icons.location_on_outlined,
                                             color: Color(0xFF52525B),
                                             size: 14),
                                         const SizedBox(width: 4),
@@ -320,11 +333,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      const Icon(Icons.calendar_today_outlined,
-                                          color: Color(0xFF52525B), size: 14),
+                                      const Icon(
+                                          Icons.calendar_today_outlined,
+                                          color: Color(0xFF52525B),
+                                          size: 14),
                                       const SizedBox(width: 4),
                                       Text(
-                                        _formatDate(profile?['created_at']),
+                                        _formatDate(
+                                            profile?['created_at']),
                                         style: const TextStyle(
                                           color: Color(0xFF71717A),
                                           fontSize: 13,
@@ -335,47 +351,35 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 ],
                               ),
                             ),
-
-                            // Stats row
                             Padding(
-                              padding:
-                                  const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                              padding: const EdgeInsets.fromLTRB(
+                                  16, 16, 16, 0),
                               child: Row(
                                 children: [
                                   _StatItem(
-                                    count: posts.length,
-                                    label: 'Posts',
-                                  ),
+                                      count: posts.length,
+                                      label: 'Posts'),
                                   const SizedBox(width: 24),
-                                  GestureDetector(
-                                    onTap: () {},
-                                    child: _StatItem(
+                                  _StatItem(
                                       count: followersCount,
-                                      label: 'Followers',
-                                    ),
-                                  ),
+                                      label: 'Followers'),
                                   const SizedBox(width: 24),
-                                  GestureDetector(
-                                    onTap: () {},
-                                    child: _StatItem(
-                                      count: profile?['following_count'] ?? 0,
-                                      label: 'Following',
-                                    ),
-                                  ),
+                                  _StatItem(
+                                      count: profile?[
+                                              'following_count'] ??
+                                          0,
+                                      label: 'Following'),
                                 ],
                               ),
                             ),
-
-                            // Divider
                             const Padding(
                               padding: EdgeInsets.only(top: 16),
                               child: Divider(
                                   color: Color(0xFF27272A), height: 1),
                             ),
-
-                            // Posts label
                             const Padding(
-                              padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
+                              padding:
+                                  EdgeInsets.fromLTRB(16, 16, 16, 8),
                               child: Text(
                                 'Posts',
                                 style: TextStyle(
@@ -389,8 +393,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                       ),
                     ),
-
-                    // ─── Posts List ───────────────────────
                     posts.isEmpty
                         ? SliverToBoxAdapter(
                             child: Container(
@@ -402,13 +404,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   Text('📭',
                                       style: TextStyle(fontSize: 48)),
                                   SizedBox(height: 16),
-                                  Text(
-                                    'No posts yet',
-                                    style: TextStyle(
-                                      color: Color(0xFF71717A),
-                                      fontSize: 16,
-                                    ),
-                                  ),
+                                  Text('No posts yet',
+                                      style: TextStyle(
+                                          color: Color(0xFF71717A),
+                                          fontSize: 16)),
                                 ],
                               ),
                             ),
@@ -423,8 +422,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   child: PostCard(
                                     post: posts[index],
                                     onDelete: (id) {
-                                      setState(() => posts.removeWhere(
-                                          (p) => p['id'] == id));
+                                      setState(() =>
+                                          posts.removeWhere(
+                                              (p) => p['id'] == id));
                                     },
                                   ),
                                 ),
@@ -450,11 +450,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 }
 
-// ─── Stat item widget ─────────────────────────────────
 class _StatItem extends StatelessWidget {
   final int count;
   final String label;
-
   const _StatItem({required this.count, required this.label});
 
   @override
@@ -462,21 +460,14 @@ class _StatItem extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          '$count',
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.w800,
-          ),
-        ),
-        Text(
-          label,
-          style: const TextStyle(
-            color: Color(0xFF71717A),
-            fontSize: 13,
-          ),
-        ),
+        Text('$count',
+            style: const TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.w800)),
+        Text(label,
+            style: const TextStyle(
+                color: Color(0xFF71717A), fontSize: 13)),
       ],
     );
   }
