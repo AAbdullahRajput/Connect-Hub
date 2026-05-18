@@ -6,7 +6,7 @@ from models.user import UpdateProfileModel
 async def get_profile(username: str):
     try:
         user = supabase.table("users").select(
-            "id, name, username, bio, profile_picture, cover_photo, role, followers_count, following_count, posts_count, created_at"
+            "id, name, username, bio, profile_picture, cover_photo, cover_position, website, location, role, followers_count, following_count, posts_count, created_at"
         ).eq("username", username).execute()
 
         if not user.data:
@@ -28,7 +28,6 @@ async def update_profile(user_id: str, data: UpdateProfileModel):
         if not update_data:
             raise HTTPException(status_code=400, detail="No fields to update")
 
-        # Check username uniqueness if being changed
         if "username" in update_data:
             existing = supabase.table("users").select("id").eq(
                 "username", update_data["username"]

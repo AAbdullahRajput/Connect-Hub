@@ -243,7 +243,7 @@ const Profile = () => {
             padding: '28px 24px',
           }}>
             <div style={{
-              height: '220px',
+              height: '300px',
               background: theme.card,
               borderRadius: '20px',
               border: `1px solid ${theme.border}`,
@@ -332,7 +332,7 @@ const Profile = () => {
           {/* Cover photo */}
           <div style={{
             position: 'relative',
-            height: '220px',
+            height: '300px',
             background: theme.card,
             borderRadius: '20px',
             overflow: 'hidden',
@@ -363,7 +363,7 @@ const Profile = () => {
                 onClick={() => navigate('/profile/edit')}
                 style={{
                   position: 'absolute',
-                  bottom: '12px',
+                  top: '12px',
                   right: '12px',
                   background: 'rgba(0,0,0,0.55)',
                   color: '#fff',
