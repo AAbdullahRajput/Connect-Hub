@@ -9,23 +9,22 @@ import 'screens/home_screen.dart';
 import 'screens/explore_screen.dart';
 import 'screens/profile_screen.dart';
 import 'screens/post_detail_screen.dart';
+import 'screens/splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final prefs = await SharedPreferences.getInstance();
-  final token = prefs.getString('token');
 
   runApp(
     ChangeNotifierProvider(
       create: (_) => AuthProvider(prefs),
-      child: MyApp(isLoggedIn: token != null),
+      child: const MyApp(),
     ),
   );
 }
 
 class MyApp extends StatelessWidget {
-  final bool isLoggedIn;
-  const MyApp({super.key, required this.isLoggedIn});
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -39,17 +38,17 @@ class MyApp extends StatelessWidget {
           primary: Color(0xFF2563EB),
           surface: Color(0xFF18181B),
         ),
-        fontFamily: 'sans-serif',
       ),
-      initialRoute: isLoggedIn ? '/home' : '/login',
+      initialRoute: '/splash',    // ← always start here
       routes: {
+        '/splash': (_) => const SplashScreen(),
         '/login': (_) => const LoginScreen(),
         '/signup': (_) => const SignupScreen(),
         '/home': (_) => const HomeScreen(),
         '/explore': (_) => const ExploreScreen(),
         '/profile': (_) => const ProfileScreen(),
         '/post': (_) => const PostDetailScreen(),
-        '/edit-profile': (context) => const EditProfileScreen(),
+        '/edit-profile': (_) => const EditProfileScreen(),
       },
     );
   }
