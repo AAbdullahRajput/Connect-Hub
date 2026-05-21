@@ -22,11 +22,12 @@ class _PostCardState extends State<PostCard> {
   late int _likesCount;
   bool _likeLoading = false;
 
-  @override
+@override
 void initState() {
   super.initState();
   _likesCount = widget.post['likes_count'] ?? 0;
-  _liked = widget.post['is_liked'] ?? false;  // ← add this line only
+  _liked = widget.post['is_liked'] ?? false;
+  debugPrint('Post ${widget.post['id']} - is_liked: ${widget.post['is_liked']}');  // ← add this
 }
 
   Future<void> _handleLike() async {
