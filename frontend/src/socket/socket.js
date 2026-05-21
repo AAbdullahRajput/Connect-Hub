@@ -8,9 +8,10 @@ let socket = null
 export const connectSocket = () => {
   if (!socket) {
     socket = io(SOCKET_URL, {
-      transports: ['websocket'],
-      autoConnect: true,
-    })
+  transports: ['polling', 'websocket'],
+  autoConnect: true,
+  withCredentials: false,
+})
 
     socket.on('connect', () => {
       console.log('Socket connected:', socket.id)
