@@ -510,10 +510,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                                         itemBuilder: (context, index) {
                                           final comment =
                                               comments[index];
-                                          final commentUser = comment[
-                                                  'users'] as Map
-                                              String,
-                                              dynamic>?;
+                                          final commentUser = comment['users'] as Map<String, dynamic>?;
                                           final isCommentOwner =
                                               auth.userId ==
                                                   comment['user_id'];
