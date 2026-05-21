@@ -3,7 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
-  static const String baseUrl = 'http://192.168.100.63:8000';
+static const String baseUrl = 'https://connect-hub-production-10a3.up.railway.app';
 
   static final Dio _dio = Dio(
     BaseOptions(
