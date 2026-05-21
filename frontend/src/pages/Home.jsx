@@ -41,6 +41,7 @@ const Home = () => {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
+        setLoading(true)
         const res = await getFeedPosts()
         setPosts(res.data.posts)
       } catch (err) {
@@ -51,7 +52,17 @@ const Home = () => {
     }
     fetchPosts()
     onPostCreated((newPost) => setPosts(prev => [newPost, ...prev]))
-    return () => removeSocketListeners()
+
+    // Refetch when tab becomes visible again
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') fetchPosts()
+    }
+    document.addEventListener('visibilitychange', handleVisibility)
+
+    return () => {
+      removeSocketListeners()
+      document.removeEventListener('visibilitychange', handleVisibility)
+    }
   }, [])
 
   const handlePostCreated = (newPost) => setPosts(prev => [newPost, ...prev])
