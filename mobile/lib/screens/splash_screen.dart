@@ -2,19 +2,35 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 
-class SplashScreen extends StatelessWidget {
+class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
+
+  @override
+  State<SplashScreen> createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<SplashScreen> {
+  bool _minTimeElapsed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Minimum 2 seconds to show splash
+    Future.delayed(const Duration(seconds: 2), () {
+      if (mounted) setState(() => _minTimeElapsed = true);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Consumer<AuthProvider>(
       builder: (context, auth, _) {
-        // Still loading from storage → show splash UI
-        if (auth.loading) {
+        // Wait for BOTH: min time AND auth check to finish
+        if (!_minTimeElapsed || auth.loading) {
           return const _SplashUI();
         }
 
-        // Loading done → redirect
+        // Both done → redirect
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (auth.isLoggedIn) {
             Navigator.pushReplacementNamed(context, '/home');
@@ -23,7 +39,7 @@ class SplashScreen extends StatelessWidget {
           }
         });
 
-        return const _SplashUI(); // briefly shown during redirect
+        return const _SplashUI();
       },
     );
   }
