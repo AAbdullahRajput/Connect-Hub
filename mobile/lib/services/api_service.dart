@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
-  static const String baseUrl = 'http://10.0.2.2:8000'; // Android emulator localhost
+  static const String baseUrl = 'http://192.168.100.63:8000'; // Android emulator localhost
   // If testing on real device, replace with your PC's IP: 'http://192.168.x.x:8000'
 
   static final Dio _dio = Dio(
