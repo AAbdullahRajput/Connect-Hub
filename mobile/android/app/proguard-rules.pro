@@ -1,0 +1,8 @@
+-keep class com.example.** { *; }
+-keep class io.flutter.** { *; }
+-dontwarn okhttp3.**
+-keep class okhttp3.** { *; }
+-dontwarn com.google.android.play.core.**
+-keep class com.google.android.play.core.** { *; }
+-dontwarn io.flutter.embedding.android.FlutterPlayStoreSplitApplication
+-dontwarn io.flutter.embedding.engine.deferredcomponents.**
