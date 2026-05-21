@@ -117,4 +117,18 @@ class ApiService {
         queryParameters: {'folder': folder},
         options: Options(headers: {'Content-Type': 'multipart/form-data'}),
       );
+
+  static Future uploadProfilePicture(File file) async {
+  final formData = FormData.fromMap({
+    'file': await MultipartFile.fromFile(file.path, filename: 'avatar.jpg'),
+  });
+  return _dio.post('/users/upload-avatar', data: formData);
+}
+
+static Future uploadCoverPhoto(File file) async {
+  final formData = FormData.fromMap({
+    'file': await MultipartFile.fromFile(file.path, filename: 'cover.jpg'),
+  });
+  return _dio.post('/users/upload-cover', data: formData);
+}
 }
