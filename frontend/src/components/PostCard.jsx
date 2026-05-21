@@ -46,7 +46,7 @@ const FlameIcon = ({ color = 'currentColor', size = 13 }) => (
 const PostCard = ({ post, onDelete }) => {
   const { user } = useAuth()
   const { theme } = useTheme()
-  const [liked, setLiked] = useState(false)
+  const [liked, setLiked] = useState(post.is_liked || false)
   const [likesCount, setLikesCount] = useState(post.likes_count || 0)
   const [loading, setLoading] = useState(false)
   const [hovered, setHovered] = useState(false)

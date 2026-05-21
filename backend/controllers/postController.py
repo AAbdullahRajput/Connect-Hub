@@ -2,10 +2,10 @@ from fastapi import HTTPException
 from config.supabase import supabase
 from models.post import CreatePostModel
 
+
 # Create new post
 async def create_post(data: CreatePostModel, user_id: str):
     try:
-        # Calculate engagement score
         engagement_score = 0
 
         new_post = supabase.table("posts").insert({
@@ -17,7 +17,6 @@ async def create_post(data: CreatePostModel, user_id: str):
             "engagement_score": engagement_score
         }).execute()
 
-        # Update user posts count
         user = supabase.table("users").select("posts_count").eq("id", user_id).execute()
         current_count = user.data[0]["posts_count"]
         supabase.table("users").update({"posts_count": current_count + 1}).eq("id", user_id).execute()
@@ -29,11 +28,17 @@ async def create_post(data: CreatePostModel, user_id: str):
 
 
 # Get all posts (explore - sorted by engagement)
-async def get_all_posts():
+async def get_all_posts(user_id: str = None):
     try:
         posts = supabase.table("posts").select(
             "*, users(id, name, username, profile_picture)"
         ).order("engagement_score", desc=True).execute()
+
+        if user_id:
+            liked = supabase.table("likes").select("post_id").eq("user_id", user_id).execute()
+            liked_ids = {l["post_id"] for l in liked.data}
+            for post in posts.data:
+                post["is_liked"] = post["id"] in liked_ids
 
         return {"posts": posts.data}
 
@@ -44,18 +49,22 @@ async def get_all_posts():
 # Get feed posts (from followed users)
 async def get_feed_posts(user_id: str):
     try:
-        # Get list of users that current user follows
         following = supabase.table("followers").select(
             "following_id"
         ).eq("follower_id", user_id).execute()
 
         following_ids = [f["following_id"] for f in following.data]
-        following_ids.append(user_id)  # include own posts
+        following_ids.append(user_id)
 
-        # Get posts from followed users
         posts = supabase.table("posts").select(
             "*, users(id, name, username, profile_picture)"
         ).in_("user_id", following_ids).order("created_at", desc=True).execute()
+
+        # Add is_liked to each post
+        liked = supabase.table("likes").select("post_id").eq("user_id", user_id).execute()
+        liked_ids = {l["post_id"] for l in liked.data}
+        for post in posts.data:
+            post["is_liked"] = post["id"] in liked_ids
 
         return {"posts": posts.data}
 
@@ -64,7 +73,7 @@ async def get_feed_posts(user_id: str):
 
 
 # Get single post
-async def get_single_post(post_id: str):
+async def get_single_post(post_id: str, user_id: str = None):
     try:
         post = supabase.table("posts").select(
             "*, users(id, name, username, profile_picture)"
@@ -73,7 +82,13 @@ async def get_single_post(post_id: str):
         if not post.data:
             raise HTTPException(status_code=404, detail="Post not found")
 
-        return {"post": post.data[0]}
+        post_data = post.data[0]
+
+        if user_id:
+            liked = supabase.table("likes").select("post_id").eq("user_id", user_id).eq("post_id", post_id).execute()
+            post_data["is_liked"] = len(liked.data) > 0
+
+        return {"post": post_data}
 
     except HTTPException as e:
         raise e
@@ -84,7 +99,6 @@ async def get_single_post(post_id: str):
 # Delete post
 async def delete_post(post_id: str, user_id: str):
     try:
-        # Check if post belongs to user
         post = supabase.table("posts").select("user_id").eq("id", post_id).execute()
 
         if not post.data:
@@ -95,7 +109,6 @@ async def delete_post(post_id: str, user_id: str):
 
         supabase.table("posts").delete().eq("id", post_id).execute()
 
-        # Update user posts count
         user = supabase.table("users").select("posts_count").eq("id", user_id).execute()
         current_count = user.data[0]["posts_count"]
         supabase.table("users").update(

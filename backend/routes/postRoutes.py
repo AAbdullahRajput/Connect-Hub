@@ -13,8 +13,8 @@ router = APIRouter()
 
 # GET /api/posts - All posts (explore)
 @router.get("")
-async def all_posts_route():
-    return await get_all_posts()
+async def all_posts_route(user_id: str = Depends(verify_token)):
+    return await get_all_posts(user_id)
 
 # GET /api/posts/feed - Feed posts (auth required)
 @router.get("/feed")
@@ -23,8 +23,8 @@ async def feed_posts_route(user_id: str = Depends(verify_token)):
 
 # GET /api/posts/:id - Single post
 @router.get("/{post_id}")
-async def single_post_route(post_id: str):
-    return await get_single_post(post_id)
+async def single_post_route(post_id: str, user_id: str = Depends(verify_token)):
+    return await get_single_post(post_id, user_id)
 
 # POST /api/posts - Create post (auth required)
 @router.post("")
