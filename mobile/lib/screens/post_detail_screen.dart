@@ -45,10 +45,11 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       final res = await ApiService.getSinglePost(postId!);
       final postData = res.data['post'] as Map<String, dynamic>;
       setState(() {
-        post = postData;
-        likesCount = postData['likes_count'] ?? 0;
-        loading = false;
-      });
+  post = postData;
+  likesCount = postData['likes_count'] ?? 0;
+  liked = postData['is_liked'] ?? false;  // ← add this line only
+  loading = false;
+});
     } catch (e) {
       setState(() => loading = false);
     }
