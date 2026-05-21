@@ -12,7 +12,6 @@
 [![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://vercel.com/)
 [![Railway](https://img.shields.io/badge/Railway-131415?style=for-the-badge&logo=railway&logoColor=white)](https://railway.app/)
 
-> **CodeAlpha Internship — Task 2**
 > A platform where users can share posts, follow each other, like & comment in real-time.
 
 </div>
