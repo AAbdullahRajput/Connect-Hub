@@ -1,9 +1,9 @@
+import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
-  static const String baseUrl = 'http://192.168.100.63:8000'; // Android emulator localhost
-  // If testing on real device, replace with your PC's IP: 'http://192.168.x.x:8000'
+  static const String baseUrl = 'http://192.168.100.63:8000';
 
   static final Dio _dio = Dio(
     BaseOptions(
@@ -15,7 +15,6 @@ class ApiService {
   );
 
   static void init() {
-    // Request interceptor — attach token to every request
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
@@ -27,7 +26,6 @@ class ApiService {
           return handler.next(options);
         },
         onError: (error, handler) async {
-          // Auto logout on 401
           if (error.response?.statusCode == 401) {
             final prefs = await SharedPreferences.getInstance();
             await prefs.remove('token');
@@ -118,17 +116,41 @@ class ApiService {
         options: Options(headers: {'Content-Type': 'multipart/form-data'}),
       );
 
-  static Future uploadProfilePicture(File file) async {
-  final formData = FormData.fromMap({
-    'file': await MultipartFile.fromFile(file.path, filename: 'avatar.jpg'),
-  });
-  return _dio.post('/users/upload-avatar', data: formData);
-}
+  // Upload avatar — uses existing /api/media/upload with folder=avatars
+  // then calls updateProfile to set the returned URL
+  static Future<void> uploadProfilePicture(File file) async {
+    final formData = FormData.fromMap({
+      'file': await MultipartFile.fromFile(
+        file.path,
+        filename: 'avatar.jpg',
+      ),
+    });
+    final res = await _dio.post(
+      '/api/media/upload',
+      data: formData,
+      queryParameters: {'folder': 'avatars'},
+      options: Options(headers: {'Content-Type': 'multipart/form-data'}),
+    );
+    final url = res.data['url'] as String;
+    await _dio.put('/api/users/profile', data: {'profile_picture': url});
+  }
 
-static Future uploadCoverPhoto(File file) async {
-  final formData = FormData.fromMap({
-    'file': await MultipartFile.fromFile(file.path, filename: 'cover.jpg'),
-  });
-  return _dio.post('/users/upload-cover', data: formData);
-}
+  // Upload cover — uses existing /api/media/upload with folder=covers
+  // then calls updateProfile to set the returned URL
+  static Future<void> uploadCoverPhoto(File file) async {
+    final formData = FormData.fromMap({
+      'file': await MultipartFile.fromFile(
+        file.path,
+        filename: 'cover.jpg',
+      ),
+    });
+    final res = await _dio.post(
+      '/api/media/upload',
+      data: formData,
+      queryParameters: {'folder': 'covers'},
+      options: Options(headers: {'Content-Type': 'multipart/form-data'}),
+    );
+    final url = res.data['url'] as String;
+    await _dio.put('/api/users/profile', data: {'cover_photo': url});
+  }
 }
