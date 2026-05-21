@@ -23,10 +23,11 @@ class _PostCardState extends State<PostCard> {
   bool _likeLoading = false;
 
   @override
-  void initState() {
-    super.initState();
-    _likesCount = widget.post['likes_count'] ?? 0;
-  }
+void initState() {
+  super.initState();
+  _likesCount = widget.post['likes_count'] ?? 0;
+  _liked = widget.post['is_liked'] ?? false;  // ← add this line only
+}
 
   Future<void> _handleLike() async {
     if (_likeLoading) return;
